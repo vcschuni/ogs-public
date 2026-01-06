@@ -104,14 +104,14 @@ oc set volume deployment/"$APP" \
 # ----------------------------
 # Expose route
 # ----------------------------
-echo ">>> Creating external route..."
-oc expose service "$APP"
+#echo ">>> Creating external route..."
+#oc expose service "$APP"
 
 # ----------------------------
 # Wait for deployment
 # ----------------------------
-echo ">>> Waiting for rollout..."
-oc rollout status deployment/"$APP" --timeout=300s
+#echo ">>> Waiting for rollout..."
+#oc rollout status deployment/"$APP" --timeout=300s
 
 # ----------------------------
 # Final status

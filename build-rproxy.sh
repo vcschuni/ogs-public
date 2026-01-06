@@ -6,6 +6,7 @@ set -euo pipefail
 # ----------------------------
 APP="geoserver-rproxy"
 PROJ="80c8d5-dev"
+SERVICE_HOSTNAME="geoserver1-${PROJ}.apps.silver.devops.gov.bc.ca"
 REPO="https://github.com/vcschuni/ogs-public.git"
 
 # ----------------------------
