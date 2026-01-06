@@ -4,10 +4,10 @@ set -euo pipefail
 # ----------------------------
 # Config
 # ----------------------------
-APP="geoserver"
+APP="ogs-geoserver"
 PROJ="80c8d5-dev"
 REPO="https://github.com/vcschuni/ogs-public.git"
-PVC_SIZE="10Gi"
+PVC_SIZE="500Mi"
 
 # ----------------------------
 # Verify passed arg and show help if required

@@ -4,9 +4,9 @@ set -euo pipefail
 # ----------------------------
 # Config
 # ----------------------------
-APP="geoserver-rproxy"
+APP="ogs-rproxy"
 PROJ="80c8d5-dev"
-SERVICE_HOSTNAME="geoserver1-${PROJ}.apps.silver.devops.gov.bc.ca"
+SERVICE_HOSTNAME="ogs-${PROJ}.apps.silver.devops.gov.bc.ca"
 REPO="https://github.com/vcschuni/ogs-public.git"
 
 # ----------------------------
@@ -76,7 +76,7 @@ oc expose deployment "${APP}" \
 echo ">>> Creating external route..."
 oc expose service "${APP}" \
   --name="${APP}" \
-  --hostname="${PROJ}.apps.silver.devops.gov.bc.ca" \
+  --hostname="${SERVICE_HOSTNAME}" \
   --labels=app="${APP}"
 
 # ----------------------------
