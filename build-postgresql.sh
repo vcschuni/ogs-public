@@ -77,10 +77,28 @@ fi
 echo ">>> Deploying PostgreSQL..."
 oc new-app "$REPO" \
   --name="${APP}" \
+  -e POSTGRES_DB=gisdata \
+  -e POSTGRES_USER=gisadmin \
+  -e POSTGRES_PASSWORD=password \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}"
+  
 
+# ----------------------------
+# Attach PVC
+# ----------------------------
+# echo ">>> Attaching PVC..."
+# oc set volume deployment/"${APP}" \
+  # --add \
+  # --name=pgdata \
+  # --type=pvc \
+  # --claim-name="${APP}-data" \
+  # --mount-path=/pgdata
+  
+# ----------------------------
+# Rollout and expose
+# ----------------------------
 echo ">>> Waiting for PostgreSQL deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
@@ -90,16 +108,6 @@ oc expose deployment "${APP}" \
   --port=5432 \
   --dry-run=client -o yaml \
   --labels=app="${APP}" | oc apply -f -
-
-# ----------------------------
-# Attach PVC
-# ----------------------------
-echo ">>> Attaching PVC..."
-oc set volume deployment/"$APP" \
-    --add \
-    --type=pvc \
-    --claim-name="${APP}-data" \
-    --mount-path=/var/lib/postgresql/data
 
 # ----------------------------
 # Final status

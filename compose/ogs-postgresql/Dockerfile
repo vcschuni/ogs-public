@@ -1,3 +1,4 @@
-FROM postgis/postgis:16-3.4
+FROM postgis/postgis:17-3.5-ubi8
+
 
 EXPOSE 5432

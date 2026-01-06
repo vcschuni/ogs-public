@@ -81,6 +81,19 @@ oc new-app "$REPO" \
   --strategy=docker \
   --labels=app="${APP}"
 
+# ----------------------------
+# Attach PVC
+# ----------------------------
+echo ">>> Attaching PVC..."
+oc set volume deployment/"${APP}" \
+    --add \
+    --type=pvc \
+    --claim-name="${APP}-data" \
+    --mount-path=/opt/geoserver_data
+
+# ----------------------------
+# Rollout and expose
+# ----------------------------
 echo ">>> Waiting for GeoServer deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
@@ -90,28 +103,6 @@ oc expose deployment "${APP}" \
   --port=8080 \
   --dry-run=client -o yaml \
   --labels=app="${APP}" | oc apply -f -
-
-# ----------------------------
-# Attach PVC
-# ----------------------------
-echo ">>> Attaching PVC..."
-oc set volume deployment/"$APP" \
-    --add \
-    --type=pvc \
-    --claim-name="${APP}-data" \
-    --mount-path=/opt/geoserver_data
-
-# ----------------------------
-# Expose route
-# ----------------------------
-#echo ">>> Creating external route..."
-#oc expose service "$APP"
-
-# ----------------------------
-# Wait for deployment
-# ----------------------------
-#echo ">>> Waiting for rollout..."
-#oc rollout status deployment/"$APP" --timeout=300s
 
 # ----------------------------
 # Final status
