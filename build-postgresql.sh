@@ -80,6 +80,7 @@ oc new-app "$REPO" \
   -e POSTGRES_DB=gisdata \
   -e POSTGRES_USER=gisadmin \
   -e POSTGRES_PASSWORD=password \
+  -e PGDATA=/pgdata \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}"
@@ -87,13 +88,13 @@ oc new-app "$REPO" \
 # ----------------------------
 # Attach PVC
 # ----------------------------
-# echo ">>> Attaching PVC..."
-# oc set volume deployment/"${APP}" \
-  # --add \
-  # --name=pgdata \
-  # --type=pvc \
-  # --claim-name="${APP}-data" \
-  # --mount-path=/var/lib/postgresql/data
+echo ">>> Attaching PVC..."
+oc set volume deployment/"${APP}" \
+  --add \
+  --name=pgdata \
+  --type=pvc \
+  --claim-name="${APP}-data" \
+  --mount-path=/pgdata
 
 # ----------------------------
 # Rollout and expose
