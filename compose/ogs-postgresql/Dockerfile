@@ -14,7 +14,7 @@ ENV TZ=America/Vancouver
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Create data directory with group write permissions
-RUN mkdir -p /var/lib/postgresql/data && chmod -R 777 /var/lib/postgresql/data
+RUN mkdir -p /var/lib/postgresql/data && chmod -R 777 /var/lib/postgresql/data && chown -R postgres:postgres /var/lib/postgresql/data
 
 # Switch back to postgres user
 USER postgres
