@@ -84,17 +84,16 @@ oc new-app "$REPO" \
   --strategy=docker \
   --labels=app="${APP}"
   
-
 # ----------------------------
 # Attach PVC
 # ----------------------------
-# echo ">>> Attaching PVC..."
-# oc set volume deployment/"${APP}" \
-  # --add \
-  # --name=pgdata \
-  # --type=pvc \
-  # --claim-name="${APP}-data" \
-  # --mount-path=/pgdata
+echo ">>> Attaching PVC..."
+oc set volume deployment/"${APP}" \
+  --add \
+  --name=pgdata \
+  --type=pvc \
+  --claim-name="${APP}-data" \
+  --mount-path=/var/lib/postgresql/data
   
 # ----------------------------
 # Rollout and expose
