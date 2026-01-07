@@ -1,10 +1,10 @@
-# Base image with Python 3.9
+# Base image with Python 3.9 preinstalled
 FROM registry.access.redhat.com/ubi9/python-39:latest
 
 USER root
 
 # ----------------------------
-# Create runtime directories (OpenShift random UID safe)
+# Create runtime directories
 # ----------------------------
 RUN mkdir -p /pgadmin4/volumes /run/httpd \
     && chmod -R 777 /pgadmin4/volumes /run/httpd
@@ -28,6 +28,12 @@ ENV PGADMIN_SETUP_PASSWORD=password
 ENV PGADMIN_LISTEN_PORT=8080
 ENV PGADMIN_CONFIG_FILE=/pgadmin4/volumes/config_local.py
 ENV PGADMIN_STORAGE_DIR=/pgadmin4/volumes
+
+# ----------------------------
+# Set working directory and Python path
+# ----------------------------
+WORKDIR /pgadmin4
+ENV PYTHONPATH="/pgadmin4:$PYTHONPATH"
 
 EXPOSE 8080
 
