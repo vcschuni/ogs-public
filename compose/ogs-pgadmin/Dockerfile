@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create directories
-RUN mkdir -p /pgadmin4/volumes /opt/pgadmin && chmod -R 777 /pgadmin4/volumes
+#RUN mkdir -p /pgadmin4/volumes /opt/pgadmin && chmod -R 777 /pgadmin4/volumes
 
 # Create virtual environment and install pgAdmin4 + Gunicorn
 RUN python3.9 -m venv /opt/pgadmin/venv \
