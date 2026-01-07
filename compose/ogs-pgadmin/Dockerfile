@@ -27,8 +27,8 @@ ENV SERVER_PORT=8080
 ENV PATH="/opt/pgadmin/venv/bin:$PATH"
 
 # Copy config_local.py into image
-COPY config_local.py /pgadmin4/volumes/config_local.py
-RUN chmod 644 /pgadmin4/volumes/config_local.py
+#COPY config_local.py /pgadmin4/volumes/config_local.py
+#RUN chmod 644 /pgadmin4/volumes/config_local.py
 
 # Expose port
 EXPOSE 8080
