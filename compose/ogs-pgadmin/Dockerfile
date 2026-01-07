@@ -1,20 +1,23 @@
-# Base UBI 9 minimal for OpenShift compatibility
+# Base UBI 9 minimal
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.3
 
-# Install Python 3 and required utilities
 USER root
-RUN microdnf install -y python39 python39-pip python39-venv \
+
+# Enable the Python 3 module and install python3 + venv + wheel
+RUN microdnf module enable python39 -y \
+    && microdnf install -y python39 python39-venv python39-wheel \
     && microdnf clean all
 
 # Create directories for pgAdmin runtime and config
-RUN mkdir -p /pgadmin4/volumes /run/httpd
-
-# Make them writable by any UID
-RUN chmod -R 777 /pgadmin4/volumes /run/httpd
+RUN mkdir -p /pgadmin4/volumes /run/httpd \
+    && chmod -R 777 /pgadmin4/volumes /run/httpd
 
 # Create a Python virtual environment for pgAdmin
 RUN python3 -m venv /pgadmin4/venv
 ENV PATH="/pgadmin4/venv/bin:$PATH"
+
+# Upgrade pip inside venv
+RUN pip install --upgrade pip
 
 # Install pgAdmin4 and Gunicorn
 RUN pip install --no-cache-dir pgadmin4 gunicorn
@@ -24,7 +27,7 @@ ENV PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca
 ENV PGADMIN_SETUP_PASSWORD=password
 ENV PGADMIN_LISTEN_PORT=8080
 
-# Expose the desired port
+# Expose port
 EXPOSE 8080
 
 # Set runtime directories
