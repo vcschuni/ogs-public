@@ -118,12 +118,12 @@ oc set volume deployment/"${APP}" \
     --type=pvc \
     --claim-name="${APP}-data" \
     --mount-path=/var/lib/pgadmin
-oc set volume deployment/"${APP}" \
-    --add \
-	--name=pgadmin-logs \
-    --type=pvc \
-    --claim-name="${APP}-logs" \
-    --mount-path=/var/log/pgadmin
+# oc set volume deployment/"${APP}" \
+    # --add \
+	# --name=pgadmin-logs \
+    # --type=pvc \
+    # --claim-name="${APP}-logs" \
+    # --mount-path=/var/log/pgadmin
 	
 # ----------------------------
 # Rollout and expose

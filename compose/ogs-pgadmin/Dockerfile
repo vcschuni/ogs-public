@@ -1,6 +1,7 @@
 # Start from Debian slim
 FROM debian:bullseye-slim
 
+# Run as root temporarily
 USER root
 
 # Install Python and dependencies
@@ -25,4 +26,7 @@ EXPOSE 8080
 USER 1001
 
 # Start pgAdmin with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
+#CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
+
+# Start pgAdmin with Gunicorn, logs go to stdout
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--access-logfile", "-", "--error-logfile", "-", "pgadmin4.pgAdmin4:app"]
