@@ -1,17 +1,19 @@
-FROM docker.io/dpage/pgadmin4:latest
+# Use the Crunchy Data OpenShift-friendly pgAdmin4 image
+FROM registry.connect.redhat.com/crunchydata/crunchy-pgadmin4:ubi9-9.8-2550
 
-# Set default admin credentials (CHANGE PASSWORD IMMEDIATELY)
-ENV PGADMIN_DEFAULT_EMAIL=volker.schunicht@gov.bc.ca
-ENV PGADMIN_DEFAULT_PASSWORD=password
+# Set default pgAdmin credentials
+ENV PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca
+ENV PGADMIN_SETUP_PASSWORD=password
 
-# Create a non-root user and group
-RUN groupadd -r pgadmin && useradd -r -g pgadmin pgadmin
+# Set pgAdmin to listen on port 8080
+ENV SERVER_PORT=8080
 
-# Change ownership of /venv so non-root user can execute
-RUN chown -R pgadmin:pgadmin /venv
+# Optional: ensure runtime directories are writable by OpenShift random UID
+USER root
+RUN mkdir -p /run/httpd && chmod -R 777 /run/httpd
+USER 1001  # Crunchy image default non-root UID
 
-USER pgadmin
+# Expose the port
+EXPOSE 8080
 
-# Expose the web port
-EXPOSE 80
-
+# Entrypoint is already configured in the base image
