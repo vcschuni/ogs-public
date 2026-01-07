@@ -60,6 +60,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ${APP}-data
+  labels: 
+    app: ${APP} 
 spec:
   accessModes:
     - ReadWriteOnce
