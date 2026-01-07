@@ -66,7 +66,7 @@ oc rollout status deployment/"${APP}" --timeout=300s
 echo ">>> Exposing pgadmin internally..."
 oc expose deployment "${APP}" \
   --name="${APP}" \
-  --port=80 \
+  --port=8080 \
   --dry-run=client -o yaml \
   --labels=app="${APP}" | oc apply -f -
 
