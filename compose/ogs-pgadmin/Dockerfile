@@ -6,7 +6,7 @@ ENV PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca
 ENV PGADMIN_SETUP_PASSWORD=password
 
 # Server listens internally on port 8080
-ENV SERVER_PORT=8080
+#ENV SERVER_PORT=8080
 
 # Make runtime directories writable for any UID
 USER root
@@ -17,4 +17,4 @@ RUN mkdir -p /run/httpd /pgadmin4/volumes \
 USER 1001
 
 # Expose the container port
-EXPOSE 8080
+EXPOSE 5050
