@@ -1,48 +1,27 @@
-# Base image with Python 3.9 preinstalled
-FROM registry.access.redhat.com/ubi9/python-39:latest
-
-USER root
-
-# ----------------------------
-# Create runtime directories
-# ----------------------------
-RUN mkdir -p /pgadmin4/volumes /run/httpd \
-    && chmod -R 777 /pgadmin4/volumes /run/httpd
-
-# ----------------------------
-# Install pgAdmin4 and Gunicorn
-# ----------------------------
-RUN pip install --no-cache-dir pgadmin4 gunicorn
-
-# ----------------------------
-# Copy Python entrypoint wrapper and config
-# ----------------------------
-COPY entrypoint.py /pgadmin4/entrypoint.py
-COPY config_local.py /pgadmin4/volumes/config_local.py
+# Use the official OpenShift-friendly pgAdmin4 image
+FROM dpage/pgadmin4:latest
 
 # ----------------------------
 # Environment variables
 # ----------------------------
-ENV PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca
-ENV PGADMIN_SETUP_PASSWORD=password
-ENV PGADMIN_LISTEN_PORT=8080
+ENV PGADMIN_DEFAULT_EMAIL=volker.schunicht@gov.bc.ca
+ENV PGADMIN_DEFAULT_PASSWORD=password
 ENV PGADMIN_CONFIG_FILE=/pgadmin4/volumes/config_local.py
-ENV PGADMIN_STORAGE_DIR=/pgadmin4/volumes
+ENV SERVER_PORT=8080
+ENV PGADMIN_DATA_DIR=/pgadmin4/volumes
 
 # ----------------------------
-# Set working directory and Python path
+# Create runtime volume directory
 # ----------------------------
-WORKDIR /pgadmin4
-ENV PYTHONPATH="/pgadmin4:$PYTHONPATH"
-
-EXPOSE 8080
-
-# ----------------------------
-# Run as non-root (OpenShift random UID safe)
-# ----------------------------
+USER root
+RUN mkdir -p /pgadmin4/volumes \
+    && chmod -R 777 /pgadmin4/volumes
 USER 1001
 
 # ----------------------------
-# Start pgAdmin using Gunicorn with the wrapper
+# Expose port
 # ----------------------------
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "entrypoint:application"]
+EXPOSE 8080
+
+# The entrypoint is already defined in the base image
+# It will pick up PGADMIN_CONFIG_FILE and PGADMIN_DATA_DIR
