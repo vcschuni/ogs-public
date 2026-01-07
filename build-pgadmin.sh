@@ -6,8 +6,8 @@ set -euo pipefail
 # ----------------------------
 APP="ogs-pgadmin"
 PROJ="80c8d5-dev"
-SERVICE_HOSTNAME="pgadmin-${PROJ}.apps.silver.devops.gov.bc.ca"
 REPO="https://github.com/vcschuni/ogs-public.git"
+PVC_SIZE="500Mi"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -35,7 +35,6 @@ echo ">>> Removing old ${APP} resources..."
 oc delete all -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
-oc delete pvc -l app="${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
 # Stop here if remove was requested
@@ -68,30 +67,10 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 500Mi
+      storage: ${PVC_SIZE}
 EOF
 else
     echo ">>> PVC ${APP}-data already exists, skipping creation"
-fi
-
-if ! oc get pvc "${APP}-logs" &>/dev/null; then
-    echo ">>> Creating PVC for logs..."
-    oc apply -f - <<EOF
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: ${APP}-logs
-  labels: 
-    app: ${APP} 
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 500Mi
-EOF
-else
-    echo ">>> PVC ${APP}-logs already exists, skipping creation"
 fi
 
 # ----------------------------
@@ -118,15 +97,9 @@ oc set volume deployment/"${APP}" \
     --type=pvc \
     --claim-name="${APP}-data" \
     --mount-path=/var/lib/pgadmin
-# oc set volume deployment/"${APP}" \
-    # --add \
-	# --name=pgadmin-logs \
-    # --type=pvc \
-    # --claim-name="${APP}-logs" \
-    # --mount-path=/var/log/pgadmin
 	
 # ----------------------------
-# Rollout and expose
+# Rollout and expose internally
 # ----------------------------
 echo ">>> Waiting for pgadmin deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
@@ -137,15 +110,6 @@ oc expose deployment "${APP}" \
   --port=8080 \
   --dry-run=client -o yaml \
   --labels=app="${APP}" | oc apply -f -
-
-# ----------------------------
-# Expose Service externally
-# ----------------------------
-echo ">>> Creating external route..."
-oc expose service "${APP}" \
-  --name="${APP}" \
-  --hostname="${SERVICE_HOSTNAME}" \
-  --labels=app="${APP}"
 
 # ----------------------------
 # Final status

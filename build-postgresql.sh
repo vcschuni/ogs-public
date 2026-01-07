@@ -99,7 +99,7 @@ oc new-app "$REPO" \
   # --mount-path=/pgdata
 
 # ----------------------------
-# Rollout and expose
+# Rollout and expose internally
 # ----------------------------
 echo ">>> Waiting for PostgreSQL deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
