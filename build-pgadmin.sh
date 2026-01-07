@@ -36,6 +36,8 @@ oc delete all -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
 
+oc delete pvc -l app="${APP}" --ignore-not-found --wait=true
+
 # ----------------------------
 # Stop here if remove was requested
 # ----------------------------
