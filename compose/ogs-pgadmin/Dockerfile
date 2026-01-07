@@ -4,8 +4,14 @@ FROM docker.io/dpage/pgadmin4:latest
 ENV PGADMIN_DEFAULT_EMAIL=volker.schunicht@gov.bc.ca
 ENV PGADMIN_DEFAULT_PASSWORD=password
 
-# This is used to serve pgadmin-web via a subpath (for purpose of reverse proxying)
-ENV SCRIPT_NAME=/pgadmin
+# Create a non-root user and group
+RUN groupadd -r pgadmin && useradd -r -g pgadmin pgadmin
+
+# Change ownership of /venv so non-root user can execute
+RUN chown -R pgadmin:pgadmin /venv
+
+USER pgadmin
 
 # Expose the web port
 EXPOSE 80
+
