@@ -35,7 +35,6 @@ echo ">>> Removing old ${APP} resources..."
 oc delete all -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
-
 oc delete pvc -l app="${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
@@ -63,7 +62,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: ${APP}-data
   labels: 
-    app: app="${APP}"
+    app: ${APP} 
 spec:
   accessModes:
     - ReadWriteOnce
@@ -71,8 +70,6 @@ spec:
     requests:
       storage: 500Mi
 EOF
-else
-    echo ">>> PVC ${APP}-data already exists, skipping creation"
 fi
 
 if ! oc get pvc "${APP}-logs" &>/dev/null; then
@@ -82,8 +79,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ${APP}-logs
-    labels: 
-    app: app="${APP}" 
+  labels: 
+    app: ${APP} 
 spec:
   accessModes:
     - ReadWriteOnce
@@ -91,8 +88,6 @@ spec:
     requests:
       storage: 500Mi
 EOF
-else
-    echo ">>> PVC ${APP}-logs already exists, skipping creation"
 fi
 
 # ----------------------------
