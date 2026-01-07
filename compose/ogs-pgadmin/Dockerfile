@@ -1,6 +1,3 @@
-# Use the Crunchy Data OpenShift-friendly pgAdmin4 image
-FROM registry.connect.redhat.com/crunchydata/crunchy-pgadmin4:ubi9-9.8-2550
-
 FROM registry.connect.redhat.com/crunchydata/crunchy-pgadmin4:ubi9-9.8-2550
 
 # Set default pgAdmin credentials
@@ -12,9 +9,9 @@ ENV SERVER_PORT=8080
 
 # Ensure runtime directories are writable by OpenShift random UID
 #USER root
-#RUN mkdir -p /run/httpd \
-#    && chmod -R 777 /run/httpd \
-#    && chown -R 1001:0 /run/httpd
+RUN mkdir -p /run/httpd \
+    && chmod -R 777 /run/httpd \
+    && chown -R 1001:0 /run/httpd
 #USER 1001
 
 # Expose the container port
