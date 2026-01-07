@@ -80,7 +80,6 @@ oc new-app "$REPO" \
   -e POSTGRES_DB=gisdata \
   -e POSTGRES_USER=gisadmin \
   -e POSTGRES_PASSWORD=password \
-  -e PGDATA=/pgdata \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}" \

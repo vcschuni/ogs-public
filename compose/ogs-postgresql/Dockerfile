@@ -1,5 +1,5 @@
 # OpenShift-compatible PostgreSQL 16 with PostGIS
-FROM docker.io/bitnami/postgresql:latest
+FROM docker.io/bitnami/postgresql:16
 
 # Optional: add initialization SQL (runs once on first startup)
 #COPY initdb.d/*.sql /docker-entrypoint-initdb.d/
