@@ -70,6 +70,8 @@ spec:
     requests:
       storage: 500Mi
 EOF
+else
+    echo ">>> PVC ${APP}-data already exists, skipping creation"
 fi
 
 if ! oc get pvc "${APP}-logs" &>/dev/null; then
@@ -88,6 +90,8 @@ spec:
     requests:
       storage: 500Mi
 EOF
+else
+    echo ">>> PVC ${APP}-logs already exists, skipping creation"
 fi
 
 # ----------------------------

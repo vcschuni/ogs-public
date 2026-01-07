@@ -10,25 +10,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create directories
-#RUN mkdir -p /pgadmin4/volumes /opt/pgadmin && chmod -R 777 /pgadmin4/volumes
-
 # Create virtual environment and install pgAdmin4 + Gunicorn
 RUN python3.9 -m venv /opt/pgadmin/venv \
     && /opt/pgadmin/venv/bin/pip install --upgrade pip \
     && /opt/pgadmin/venv/bin/pip install pgadmin4 gunicorn
 
 # Set environment variables
-#ENV PGADMIN_DEFAULT_EMAIL=volker.schunicht@gov.bc.ca
-#ENV PGADMIN_DEFAULT_PASSWORD=password
-#ENV PGADMIN_DATA_DIR=/pgadmin4/volumes
-#ENV PGADMIN_CONFIG_FILE=/pgadmin4/volumes/config_local.py
-#ENV SERVER_PORT=8080
-ENV PATH="/opt/pgadmin/venv/bin:$PATH"
-
-# Copy config_local.py into image
-#COPY config_local.py /pgadmin4/volumes/config_local.py
-#RUN chmod 644 /pgadmin4/volumes/config_local.py
+#ENV PATH="/opt/pgadmin/venv/bin:$PATH"
 
 # Expose port
 EXPOSE 8080
