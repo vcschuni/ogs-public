@@ -1,8 +1,6 @@
-# Bitnami PostgreSQL 16 with PostGIS
-FROM docker.io/bitnami/postgresql-postgis:16
+FROM registry.redhat.io/rhel9/postgresql-16
 
-# Add initialization SQL (runs only on first startup)
-#COPY initdb.d/*.sql /docker-entrypoint-initdb.d/
+USER root
+RUN dnf install -y postgis35_16 && dnf clean all
 
-# Add custom PostgreSQL config
-# COPY postgresql.conf /opt/bitnami/postgresql/conf/
+USER 26

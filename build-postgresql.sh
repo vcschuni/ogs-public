@@ -83,7 +83,8 @@ oc new-app "$REPO" \
   -e PGDATA=/pgdata \
   --context-dir="compose/${APP}" \
   --strategy=docker \
-  --labels=app="${APP}"
+  --labels=app="${APP}" \
+  --allow-missing-images
   
 # ----------------------------
 # Attach PVC
