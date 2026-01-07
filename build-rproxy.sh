@@ -60,6 +60,9 @@ oc new-app "$REPO" \
   --strategy=docker \
   --labels=app="${APP}"
 
+# ----------------------------
+# Rollout and expose internally
+# ----------------------------
 echo ">>> Waiting for Nginx deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
@@ -71,7 +74,7 @@ oc expose deployment "${APP}" \
   --labels=app="${APP}" | oc apply -f -
 
 # ----------------------------
-# Expose Service
+# Expose Service Externally
 # ----------------------------
 echo ">>> Creating external route..."
 oc expose service "${APP}" \
