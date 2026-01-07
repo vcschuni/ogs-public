@@ -89,13 +89,13 @@ oc new-app "$REPO" \
 # ----------------------------
 # Attach PVC
 # ----------------------------
-echo ">>> Attaching PVC..."
-oc set volume deployment/"${APP}" \
-  --add \
-  --name=pgdata \
-  --type=pvc \
-  --claim-name="${APP}-data" \
-  --mount-path=/pgdata
+# echo ">>> Attaching PVC..."
+# oc set volume deployment/"${APP}" \
+  # --add \
+  # --name=pgdata \
+  # --type=pvc \
+  # --claim-name="${APP}-data" \
+  # --mount-path=/pgdata
 
 # ----------------------------
 # Rollout and expose

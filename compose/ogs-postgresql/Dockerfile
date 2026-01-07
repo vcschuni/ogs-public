@@ -1,6 +1,8 @@
-FROM registry.redhat.io/rhel9/postgresql-16
+# OpenShift-compatible PostgreSQL 16 with PostGIS
+FROM docker.io/bitnami/postgresql-postgis:16
 
-USER root
-RUN dnf install -y postgis35_16 && dnf clean all
+# Optional: add initialization SQL (runs once on first startup)
+#COPY initdb.d/*.sql /docker-entrypoint-initdb.d/
 
-USER 26
+# Set timezone (safe, no root required)
+ENV TZ=America/Vancouver
