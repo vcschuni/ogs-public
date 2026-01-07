@@ -11,9 +11,17 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment and install pgAdmin4 + Gunicorn
+#RUN python3.9 -m venv /opt/pgadmin/venv \
+#    && /opt/pgadmin/venv/bin/pip install --upgrade pip \
+#    && /opt/pgadmin/venv/bin/pip install pgadmin4 gunicorn
+	
+	
+# Create virtual environment and install pgAdmin4 + Gunicorn
 RUN python3.9 -m venv /opt/pgadmin/venv \
-    && /opt/pgadmin/venv/bin/pip install --upgrade pip \
+    && /opt/pgadmin/venv/bin/pip install --upgrade pip setuptools wheel \
+    && /opt/pgadmin/venv/bin/pip install "importlib-metadata>=6.0" \
     && /opt/pgadmin/venv/bin/pip install pgadmin4 gunicorn
+	
 
 # Set environment variables
 ENV PATH="/opt/pgadmin/venv/bin:$PATH"
