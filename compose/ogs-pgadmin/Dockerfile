@@ -1,4 +1,4 @@
-# Use the official OpenShift-friendly pgAdmin4 image
+# Use OpenShift-friendly pgAdmin4 image
 FROM dpage/pgadmin4:latest
 
 # ----------------------------
@@ -6,16 +6,23 @@ FROM dpage/pgadmin4:latest
 # ----------------------------
 ENV PGADMIN_DEFAULT_EMAIL=volker.schunicht@gov.bc.ca
 ENV PGADMIN_DEFAULT_PASSWORD=password
-ENV PGADMIN_CONFIG_FILE=/pgadmin4/volumes/config_local.py
-ENV SERVER_PORT=8080
 ENV PGADMIN_DATA_DIR=/pgadmin4/volumes
+ENV SERVER_PORT=8080
+ENV PGADMIN_CONFIG_FILE=/pgadmin4/volumes/config_local.py
 
 # ----------------------------
-# Create runtime volume directory
+# Create writable volume directory
 # ----------------------------
 USER root
 RUN mkdir -p /pgadmin4/volumes \
     && chmod -R 777 /pgadmin4/volumes
+
+# ----------------------------
+# Copy config_local.py into the image
+# ----------------------------
+COPY config_local.py /pgadmin4/volumes/config_local.py
+RUN chmod 644 /pgadmin4/volumes/config_local.py
+
 USER 1001
 
 # ----------------------------
@@ -23,5 +30,4 @@ USER 1001
 # ----------------------------
 EXPOSE 8080
 
-# The entrypoint is already defined in the base image
-# It will pick up PGADMIN_CONFIG_FILE and PGADMIN_DATA_DIR
+# Base image already has an entrypoint that starts pgAdmin
