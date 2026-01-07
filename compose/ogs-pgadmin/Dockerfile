@@ -14,8 +14,10 @@ RUN apt-get update && apt-get install -y \
 # Create virtual environment and install pgAdmin4 + Gunicorn
 RUN python3.9 -m venv /opt/pgadmin/venv \
     && /opt/pgadmin/venv/bin/pip install --upgrade pip \
-    && /opt/pgadmin/venv/bin/pip install pgadmin4 gunicorn \
-	&& echo "import sys; LOG_FILE = sys.stdout" > /opt/pgadmin/venv/lib/python3.9/site-packages/pgadmin4/config_local.py
+    && /opt/pgadmin/venv/bin/pip install pgadmin4 gunicorn
+
+# Override pgAdmin logging to /tmp
+RUN echo "LOG_FILE = '/tmp/pgadmin.log'" > /opt/pgadmin/venv/lib/python3.9/site-packages/pgadmin4/config_local.py
 
 # Set environment variables
 ENV PATH="/opt/pgadmin/venv/bin:$PATH"
