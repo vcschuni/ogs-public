@@ -16,7 +16,7 @@ RUN python3.9 -m venv /opt/pgadmin/venv \
     && /opt/pgadmin/venv/bin/pip install pgadmin4 gunicorn
 
 # Set environment variables
-#ENV PATH="/opt/pgadmin/venv/bin:$PATH"
+ENV PATH="/opt/pgadmin/venv/bin:$PATH"
 
 # Expose port
 EXPOSE 8080
