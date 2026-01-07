@@ -1,41 +1,32 @@
-# Base UBI 9 minimal
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.3
+# Base image with Python 3.9 preinstalled
+FROM registry.access.redhat.com/ubi9/python-39:latest
 
 USER root
-
-# Enable the Python 3 module and install python3 + venv + wheel
-RUN microdnf module enable python39 -y \
-    && microdnf install -y python39 python39-venv python39-wheel \
-    && microdnf clean all
 
 # Create directories for pgAdmin runtime and config
 RUN mkdir -p /pgadmin4/volumes /run/httpd \
     && chmod -R 777 /pgadmin4/volumes /run/httpd
 
-# Create a Python virtual environment for pgAdmin
-RUN python3 -m venv /pgadmin4/venv
-ENV PATH="/pgadmin4/venv/bin:$PATH"
+# Set PATH (python already in base)
+ENV PATH="/usr/local/bin:$PATH"
 
-# Upgrade pip inside venv
-RUN pip install --upgrade pip
-
-# Install pgAdmin4 and Gunicorn
+# Install Gunicorn and pgAdmin4
 RUN pip install --no-cache-dir pgadmin4 gunicorn
 
-# Set environment variables for default login
+# Default credentials
 ENV PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca
 ENV PGADMIN_SETUP_PASSWORD=password
-ENV PGADMIN_LISTEN_PORT=8080
 
-# Expose port
+# Expose port 8080
+ENV PGADMIN_LISTEN_PORT=8080
 EXPOSE 8080
 
-# Set runtime directories
+# Runtime directories
 ENV PGADMIN_CONFIG_FILE=/pgadmin4/volumes/config.py
 ENV PGADMIN_STORAGE_DIR=/pgadmin4/volumes
 
-# Switch to non-root user (OpenShift random UID compatible)
+# Switch to non-root user (OpenShift safe)
 USER 1001
 
-# Start pgAdmin using Gunicorn
+# Start pgAdmin
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
