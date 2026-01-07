@@ -2,8 +2,8 @@
 FROM fgomezotero/pgadmin4-openshift:latest
 
 # Set pgAdmin credentials (optional, can also use oc set env)
-ENV PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca
-ENV PGADMIN_SETUP_PASSWORD=password
+ENV PGADMIN_DEFAULT_EMAIL=volker.schunicht@gov.bc.ca
+ENV PPGADMIN_DEFAULT_PASSWORD=password
 
 # Listen internally on 8080
 ENV SERVER_PORT=8080
