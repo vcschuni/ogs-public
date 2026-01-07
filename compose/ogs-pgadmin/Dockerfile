@@ -11,11 +11,11 @@ ENV PGADMIN_SETUP_PASSWORD=password
 ENV SERVER_PORT=8080
 
 # Ensure runtime directories are writable by OpenShift random UID
-USER root
-RUN mkdir -p /run/httpd \
-    && chmod -R 777 /run/httpd \
-    && chown -R 1001:0 /run/httpd
-USER 1001
+#USER root
+#RUN mkdir -p /run/httpd \
+#    && chmod -R 777 /run/httpd \
+#    && chown -R 1001:0 /run/httpd
+#USER 1001
 
 # Expose the container port
 EXPOSE 8080
