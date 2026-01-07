@@ -51,15 +51,15 @@ if [[ "${ACTION}" == "remove" ]]; then
 fi
 
 # ----------------------------
-# Create PVCs if they doesn't exist
+# Create PVC if it doesn't exist
 # ----------------------------
-if ! oc get pvc "${APP}-volumes" &>/dev/null; then
-    echo ">>> Creating PVC for GeoServer data..."
+if ! oc get pvc "${APP}-data" &>/dev/null; then
+    echo ">>> Creating PVC for data..."
     oc apply -f - <<EOF
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ${APP}-volumes
+  name: ${APP}-data
 spec:
   accessModes:
     - ReadWriteOnce
@@ -68,16 +68,16 @@ spec:
       storage: 500Mi
 EOF
 else
-    echo ">>> PVC ${APP}-volumes already exists, skipping creation"
+    echo ">>> PVC ${APP}-data already exists, skipping creation"
 fi
 
-if ! oc get pvc "${APP}-httpd" &>/dev/null; then
-    echo ">>> Creating PVC for GeoServer data..."
+if ! oc get pvc "${APP}-logs" &>/dev/null; then
+    echo ">>> Creating PVC for logs..."
     oc apply -f - <<EOF
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ${APP}-httpd
+  name: ${APP}-logs
 spec:
   accessModes:
     - ReadWriteOnce
@@ -86,7 +86,7 @@ spec:
       storage: 500Mi
 EOF
 else
-    echo ">>> PVC ${APP}-httpd already exists, skipping creation"
+    echo ">>> PVC ${APP}-logs already exists, skipping creation"
 fi
 
 # ----------------------------
@@ -97,27 +97,29 @@ oc new-app "$REPO" \
   --name="${APP}" \
   --context-dir="compose/${APP}" \
   --strategy=docker \
-  --labels=app="${APP}"
+  --labels=app="${APP}" \
+  -e PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca \
+  -e PGADMIN_SETUP_PASSWORD=password \
+  -e PGADMIN_LISTEN_PORT=8080 \
+  -e PGADMIN_SERVER_MODE=True
   
 # ----------------------------
-# Attach PVCs
+# Attach PVC
 # ----------------------------
-# echo ">>> Attaching PVC..."
-# oc set volume deployment/"${APP}" \
-    # --add \
-	# --name=pgadmin-volumes \
-    # --type=emptyDir \
-    # --claim-name="${APP}-volumes" \
-    # --mount-path=/pgadmin4/volumes
+echo ">>> Attaching PVC..."
+oc set volume deployment/"${APP}" \
+    --add \
+	--name=pgadmin-data \
+    --type=pvc \
+    --claim-name="${APP}-data" \
+    --mount-path=/var/lib/pgadmin
+oc set volume deployment/"${APP}" \
+    --add \
+	--name=pgadmin-logs \
+    --type=pvc \
+    --claim-name="${APP}-logs" \
+    --mount-path=/var/log/pgadmin
 	
-# echo ">>> Attaching PVC..."
-# oc set volume deployment/"${APP}" \
-    # --add \
-	# --name=run-httpd \
-    # --type=emptyDir \
-    # --claim-name="${APP}-httpd" \
-    # --mount-path=/run/httpd
-
 # ----------------------------
 # Rollout and expose
 # ----------------------------
