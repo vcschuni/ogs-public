@@ -1,19 +1,20 @@
-# Use the fgomezotero OpenShift pgAdmin4 image
-FROM fgomezotero/pgadmin4-openshift:latest
+# Crunchy pgAdmin OpenShift-ready image
+FROM registry.connect.redhat.com/crunchydata/crunchy-pgadmin4:ubi9-9.8-2550
 
-# Set pgAdmin credentials (optional, can also use oc set env)
-ENV PGADMIN_DEFAULT_EMAIL=volker.schunicht@gov.bc.ca
-ENV PGADMIN_DEFAULT_PASSWORD=password
+# Set default credentials (can be overridden with oc set env)
+ENV PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca
+ENV PGADMIN_SETUP_PASSWORD=password
 
-# Listen internally on 8080
+# Server listens internally on 8080
 ENV SERVER_PORT=8080
 
-# Make runtime directories writable by any UID
+# Make runtime and binary directories fully accessible
 USER root
 RUN mkdir -p /run/httpd /pgadmin4/volumes \
-    && chmod -R 777 /run/httpd /pgadmin4/volumes
+    && chmod -R 777 /run/httpd /pgadmin4/volumes \
+    && chmod -R a+rx /venv/bin /usr/local/bin /usr/bin
 
-# Let OpenShift assign the runtime UID automatically
+# Switch back to non-root user
 USER 1001
 
 # Expose the container port
