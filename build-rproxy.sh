@@ -53,7 +53,7 @@ fi
 # ----------------------------
 # Deploy Nginx
 # ----------------------------
-echo ">>> Deploying Nginx (port 8080)..."
+echo ">>> Deploying Nginx..."
 oc new-app "$REPO" \
   --name="${APP}" \
   --context-dir="compose/${APP}" \
@@ -63,7 +63,7 @@ oc new-app "$REPO" \
 echo ">>> Waiting for Nginx deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
-echo ">>> Exposing Nginx externally on port 8080..."
+echo ">>> Exposing Nginx internally..."
 oc expose deployment "${APP}" \
   --name="${APP}" \
   --port=8080 \

@@ -97,7 +97,7 @@ oc set volume deployment/"${APP}" \
 echo ">>> Waiting for GeoServer deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
-echo ">>> Exposing GeoServer internally on port 8080..."
+echo ">>> Exposing GeoServer internally..."
 oc expose deployment "${APP}" \
   --name="${APP}" \
   --port=8080 \
