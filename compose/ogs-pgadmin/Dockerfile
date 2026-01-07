@@ -1,5 +1,5 @@
-# Crunchy pgAdmin4 OpenShift-friendly image
-FROM registry.connect.redhat.com/crunchydata/crunchy-pgadmin4:ubi9-9.8-2550
+# Use the fgomezotero OpenShift pgAdmin4 image
+FROM fgomezotero/pgadmin4-openshift:latest
 
 # Set pgAdmin credentials (optional, can also use oc set env)
 ENV PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca
