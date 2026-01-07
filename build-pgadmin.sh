@@ -51,6 +51,45 @@ if [[ "${ACTION}" == "remove" ]]; then
 fi
 
 # ----------------------------
+# Create PVCs if they doesn't exist
+# ----------------------------
+if ! oc get pvc "${APP}-volumes" &>/dev/null; then
+    echo ">>> Creating PVC for GeoServer data..."
+    oc apply -f - <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${APP}-volumes
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: ${PVC_SIZE}
+EOF
+else
+    echo ">>> PVC ${APP}-volumes already exists, skipping creation"
+fi
+
+if ! oc get pvc "${APP}-httpd" &>/dev/null; then
+    echo ">>> Creating PVC for GeoServer data..."
+    oc apply -f - <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${APP}-httpd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: ${PVC_SIZE}
+EOF
+else
+    echo ">>> PVC ${APP}-httpd already exists, skipping creation"
+fi
+
+# ----------------------------
 # Deploy pgadmin
 # ----------------------------
 echo ">>> Deploying pgadmin..."
@@ -59,7 +98,29 @@ oc new-app "$REPO" \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}"
+  
+# ----------------------------
+# Attach PVCs
+# ----------------------------
+echo ">>> Attaching PVC..."
+oc set volume deployment/"${APP}" \
+    --add \
+	--name=pgadmin-volumes \
+    --type=emptyDir \
+    --claim-name="${APP}-volumes" \
+    --mount-path=/pgadmin4/volumes
+	
+echo ">>> Attaching PVC..."
+oc set volume deployment/"${APP}" \
+    --add \
+	--name=run-httpd \
+    --type=emptyDir \
+    --claim-name="${APP}-httpd" \
+    --mount-path=/run/httpd
 
+# ----------------------------
+# Rollout and expose
+# ----------------------------
 echo ">>> Waiting for pgadmin deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
@@ -71,7 +132,7 @@ oc expose deployment "${APP}" \
   --labels=app="${APP}" | oc apply -f -
 
 # ----------------------------
-# Expose Service
+# Expose Service externally
 # ----------------------------
 echo ">>> Creating external route..."
 oc expose service "${APP}" \
