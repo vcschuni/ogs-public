@@ -2,14 +2,14 @@
 FROM docker.io/bitnami/postgresql:latest
 
 # Install PostGIS, cron, and utilities
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
     nano \
     postgresql-16-postgis \
     postgis \
     gdal-bin \
     cron \
 	tzdata \
-    && apt-get clean
+    && apt clean
 	
 # Set timezone to Pacific (BC)
 ENV TZ=America/Vancouver
