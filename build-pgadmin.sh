@@ -62,6 +62,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ${APP}-data
+  labels: 
+    app: app="${APP}"
 spec:
   accessModes:
     - ReadWriteOnce
@@ -80,6 +82,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: ${APP}-logs
+    labels: 
+    app: app="${APP}" 
 spec:
   accessModes:
     - ReadWriteOnce
