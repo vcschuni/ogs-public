@@ -65,7 +65,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: ${PVC_SIZE}
+      storage: 500Mi
 EOF
 else
     echo ">>> PVC ${APP}-volumes already exists, skipping creation"
@@ -83,7 +83,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: ${PVC_SIZE}
+      storage: 500Mi
 EOF
 else
     echo ">>> PVC ${APP}-httpd already exists, skipping creation"
@@ -102,21 +102,21 @@ oc new-app "$REPO" \
 # ----------------------------
 # Attach PVCs
 # ----------------------------
-echo ">>> Attaching PVC..."
-oc set volume deployment/"${APP}" \
-    --add \
-	--name=pgadmin-volumes \
-    --type=emptyDir \
-    --claim-name="${APP}-volumes" \
-    --mount-path=/pgadmin4/volumes
+# echo ">>> Attaching PVC..."
+# oc set volume deployment/"${APP}" \
+    # --add \
+	# --name=pgadmin-volumes \
+    # --type=emptyDir \
+    # --claim-name="${APP}-volumes" \
+    # --mount-path=/pgadmin4/volumes
 	
-echo ">>> Attaching PVC..."
-oc set volume deployment/"${APP}" \
-    --add \
-	--name=run-httpd \
-    --type=emptyDir \
-    --claim-name="${APP}-httpd" \
-    --mount-path=/run/httpd
+# echo ">>> Attaching PVC..."
+# oc set volume deployment/"${APP}" \
+    # --add \
+	# --name=run-httpd \
+    # --type=emptyDir \
+    # --claim-name="${APP}-httpd" \
+    # --mount-path=/run/httpd
 
 # ----------------------------
 # Rollout and expose
