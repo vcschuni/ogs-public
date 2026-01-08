@@ -84,12 +84,13 @@ oc new-app "$REPO" \
   -e POSTGRES_PASSWORD=password \
   --context-dir="compose/${APP}" \
   --strategy=docker \
-  --labels=app="${APP}"
+  --labels=app="${APP}" 
   
 # ----------------------------
 # Attach PVC
 # ----------------------------
 echo ">>> Attaching PVC..."
+oc set volume deployment/ogs-postgresql --remove --all --confirm
 oc set volume deployment/"${APP}" \
   --add \
   --name="${APP}-data" \
