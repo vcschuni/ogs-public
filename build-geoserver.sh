@@ -109,11 +109,4 @@ oc expose deployment "${APP}" \
 # ----------------------------
 # Final status
 # ----------------------------
-echo ">>> Current Resources:"
-oc get pods -o wide
-oc get svc
-oc get routes
-oc get builds
-oc get pvc
-
 echo ">>> COMPLETE — ${APP} deployed!"

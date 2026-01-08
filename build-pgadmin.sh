@@ -6,7 +6,6 @@ set -euo pipefail
 # ----------------------------
 APP="ogs-pgadmin"
 PROJ="80c8d5-dev"
-SERVICE_HOSTNAME="pgadmin-${PROJ}.apps.silver.devops.gov.bc.ca"
 REPO="https://github.com/vcschuni/ogs-public.git"
 PVC_SIZE="500Mi"
 
@@ -113,22 +112,6 @@ oc expose deployment "${APP}" \
   --labels=app="${APP}" | oc apply -f -
 
 # ----------------------------
-# Expose Service Externally
-# ----------------------------
-echo ">>> Creating external route..."
-oc expose service "${APP}" \
-  --name="${APP}" \
-  --hostname="${SERVICE_HOSTNAME}" \
-  --labels=app="${APP}"
-
-# ----------------------------
 # Final status
 # ----------------------------
-echo ">>> Current Resources:"
-oc get pods -o wide
-oc get svc
-oc get routes
-oc get builds
-oc get pvc
-
 echo ">>> COMPLETE — ${APP} deployed!"
