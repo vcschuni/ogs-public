@@ -4,5 +4,5 @@ FROM docker.io/bitnami/postgresql:latest
 ENV TZ=America/Vancouver
 
 # Optional: add initialization SQL (runs once on first startup)
-#COPY initdb.d/*.sql /docker-entrypoint-initdb.d/
+COPY initdb.d/*.sql /docker-entrypoint-initdb.d/
 

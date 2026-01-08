@@ -40,10 +40,6 @@ oc delete is -l app="${APP}" --ignore-not-found --wait=true
 # Stop here if remove was requested
 # ----------------------------
 if [[ "${ACTION}" == "remove" ]]; then
-	oc get pods -o wide
-	oc get svc
-	oc get routes
-	oc get builds
 	echo ""
 	echo ">>> Remove completed successfully"
 	echo ""

@@ -47,10 +47,6 @@ oc delete is -l app="${APP}" --ignore-not-found --wait=true
 # Stop here if remove was requested
 # ----------------------------
 if [[ "${ACTION}" == "remove" ]]; then
-	oc get pods -o wide
-	oc get svc
-	oc get routes
-	oc get builds
 	echo ""
 	echo ">>> Remove completed successfully"
 	echo ""
@@ -87,7 +83,7 @@ echo ">>> Deploying PostgreSQL..."
 oc new-app "$REPO" \
   --name="${APP}" \
   -e POSTGRES_DB=gisdata \
-  -e POSTGRES_USER=gisadmin \
+  -e POSTGRES_USER=spatialadmin \
   -e POSTGRES_PASSWORD=$(oc get secret postgres-password -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 --decode) \
   --context-dir="compose/${APP}" \
   --strategy=docker \
