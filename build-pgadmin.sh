@@ -14,6 +14,7 @@ set -euo pipefail
 # ----------------------------
 APP="ogs-pgadmin"
 PROJ="80c8d5-dev"
+SERVICE_HOSTNAME="pgadmin-${PROJ}.apps.silver.devops.gov.bc.ca"
 REPO="https://github.com/vcschuni/ogs-public.git"
 PVC_SIZE="500Mi"
 
@@ -103,8 +104,8 @@ oc new-app "$REPO" \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}" \
-  -e PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca \
-  -e PGADMIN_SETUP_PASSWORD=password \
+  -e PGADMIN_SETUP_EMAIL=spatialadmin \
+  -e PGADMIN_SETUP_PASSWORD=$(oc get secret pgadmin-password -o jsonpath='{.data.PGADMIN_PASSWORD}' | base64 --decode) \
   -e PGADMIN_LISTEN_PORT=8080 \
   -e PGADMIN_SERVER_MODE=True
   
@@ -131,6 +132,15 @@ oc expose deployment "${APP}" \
   --port=8080 \
   --dry-run=client -o yaml \
   --labels=app="${APP}" | oc apply -f -
+
+# ----------------------------
+# Expose Service Externally
+# ----------------------------
+echo ">>> Creating external route..."
+oc expose service "${APP}" \
+  --name="${APP}" \
+  --hostname="${SERVICE_HOSTNAME}" \
+  --labels=app="${APP}"
 
 # ----------------------------
 # Final status
