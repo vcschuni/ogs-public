@@ -2,6 +2,13 @@
 set -euo pipefail
 
 # ----------------------------
+# Notes
+# ----------------------------
+# Before executing this script, a postgres password must exist. The following command
+# can be used to do this:
+#    oc create secret generic postgres-password --from-literal=POSTGRES_PASSWORD=MyStrongSecret123
+
+# ----------------------------
 # Config
 # ----------------------------
 APP="ogs-postgresql"
@@ -81,7 +88,7 @@ oc new-app "$REPO" \
   --name="${APP}" \
   -e POSTGRES_DB=gisdata \
   -e POSTGRES_USER=gisadmin \
-  -e POSTGRES_PASSWORD=password \
+  -e POSTGRES_PASSWORD=$(oc get secret postgres-password -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 --decode) \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}" 
