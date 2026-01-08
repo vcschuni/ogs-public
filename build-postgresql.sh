@@ -7,6 +7,7 @@ set -euo pipefail
 # Before executing this script, a postgres password must exist. The following command
 # can be used to do this:
 #    oc create secret generic postgres-password --from-literal=POSTGRES_PASSWORD=MyStrongSecret123
+#
 
 # ----------------------------
 # Config

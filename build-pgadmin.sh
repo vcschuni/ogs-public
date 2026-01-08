@@ -2,6 +2,14 @@
 set -euo pipefail
 
 # ----------------------------
+# Notes
+# ----------------------------
+# Before executing this script, a pgadmin password must exist. The following command
+# can be used to do this:
+#    oc create secret generic pgadmin-password --from-literal=PGADMIN_PASSWORD=MyStrongSecret123
+#
+
+# ----------------------------
 # Config
 # ----------------------------
 APP="ogs-pgadmin"
@@ -95,8 +103,8 @@ oc new-app "$REPO" \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}" \
-  -e PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca \
-  -e PGADMIN_SETUP_PASSWORD=password \
+  -e PGADMIN_SETUP_EMAIL=spatialadmin \
+  -e PGADMIN_SETUP_PASSWORD=$(oc get secret pgadmin-password -o jsonpath='{.data.PGADMIN_PASSWORD}' | base64 --decode) \
   -e PGADMIN_LISTEN_PORT=8080 \
   -e PGADMIN_SERVER_MODE=True
   
