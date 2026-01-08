@@ -45,8 +45,6 @@ oc delete all -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
 
-oc delete pvc -l app="${APP}" --ignore-not-found --wait=true
-
 # ----------------------------
 # Stop here if remove was requested
 # ----------------------------
@@ -132,15 +130,6 @@ oc expose deployment "${APP}" \
   --port=8080 \
   --dry-run=client -o yaml \
   --labels=app="${APP}" | oc apply -f -
-
-# ----------------------------
-# Expose Service Externally
-# ----------------------------
-echo ">>> Creating external route..."
-oc expose service "${APP}" \
-  --name="${APP}" \
-  --hostname="${SERVICE_HOSTNAME}" \
-  --labels=app="${APP}"
 
 # ----------------------------
 # Final status
