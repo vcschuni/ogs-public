@@ -22,6 +22,8 @@ RUN echo "LOG_FILE = '/tmp/pgadmin.log'" > /opt/pgadmin/venv/lib/python3.9/site-
 # Set environment variables
 ENV PATH="/opt/pgadmin/venv/bin:$PATH"
 ENV SCRIPT_NAME=/pgadmin
+ENV PGADMIN_LISTEN_PORT=8080
+ENV PGADMIN_SERVER_MODE=True 
 
 # Expose port
 EXPOSE 8080

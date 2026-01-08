@@ -45,6 +45,8 @@ oc delete all -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
 
+oc delete pvc -l app="${APP}" --ignore-not-found --wait=true
+
 # ----------------------------
 # Stop here if remove was requested
 # ----------------------------
@@ -104,10 +106,8 @@ oc new-app "$REPO" \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}" \
-  -e PGADMIN_SETUP_EMAIL=spatialadmin \
-  -e PGADMIN_SETUP_PASSWORD=$(oc get secret pgadmin-password -o jsonpath='{.data.PGADMIN_PASSWORD}' | base64 --decode) \
-  -e PGADMIN_LISTEN_PORT=8080 \
-  -e PGADMIN_SERVER_MODE=True
+  -e PGADMIN_SETUP_EMAIL=spatialadmin@gov.bc.ca \
+  -e PGADMIN_SETUP_PASSWORD=$(oc get secret pgadmin-password -o jsonpath='{.data.PGADMIN_PASSWORD}' | base64 --decode)
   
 # ----------------------------
 # Attach PVC
