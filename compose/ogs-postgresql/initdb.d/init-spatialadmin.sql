@@ -1,2 +1,1 @@
--- Make spatialadmin a superuser
-ALTER USER spatialadmin WITH SUPERUSER;
+CREATE EXTENSION postgis;

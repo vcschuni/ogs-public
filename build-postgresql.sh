@@ -72,6 +72,23 @@ spec:
     requests:
       storage: ${PVC_SIZE}
 EOF
+	echo ">>> Waiting for PVC for to be ready..."
+	COUNT=0
+	while true; do
+		STATUS=$(oc get pvc "${APP}-data" -o jsonpath='{.status.phase}')
+		echo "Current status: $STATUS"
+
+		if [[ "$STATUS" == "Bound" ]]; then
+			echo ">>> PVC is ready!"
+			break
+		fi
+		sleep 5
+		COUNT=$((COUNT+1))
+		if [[ $COUNT -ge 30 ]]; then
+			echo ">>> Timeout waiting for PVC!"
+			exit 1
+		fi
+	done
 else
     echo ">>> PVC ${APP}-data already exists, skipping creation"
 fi
@@ -83,7 +100,7 @@ echo ">>> Deploying PostgreSQL..."
 oc new-app "$REPO" \
   --name="${APP}" \
   -e POSTGRES_DB=gisdata \
-  -e POSTGRES_USER=spatialadmin \
+  -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=$(oc get secret postgres-password -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 --decode) \
   --context-dir="compose/${APP}" \
   --strategy=docker \
