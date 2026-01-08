@@ -103,8 +103,8 @@ oc new-app "$REPO" \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}" \
-  -e PGADMIN_SETUP_EMAIL=spatialadmin \
-  -e PGADMIN_SETUP_PASSWORD=$(oc get secret pgadmin-password -o jsonpath='{.data.PGADMIN_PASSWORD}' | base64 --decode) \
+  -e PGADMIN_SETUP_EMAIL=volker.schunicht@gov.bc.ca \
+  -e PGADMIN_SETUP_PASSWORD=password \
   -e PGADMIN_LISTEN_PORT=8080 \
   -e PGADMIN_SERVER_MODE=True
   
