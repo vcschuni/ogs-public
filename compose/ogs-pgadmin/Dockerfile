@@ -6,18 +6,18 @@ USER root
 
 # Install Python and dependencies
 RUN apt-get update && apt-get install -y \
-    python3.10 python3.10-venv python3-pip \
+    python3.9 python3.9-venv python3-pip \
     libpq-dev build-essential \
     curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment and install pgAdmin4 + Gunicorn
-RUN python3.10 -m venv /opt/pgadmin/venv \
+RUN python3.9 -m venv /opt/pgadmin/venv \
     && /opt/pgadmin/venv/bin/pip install --upgrade pip \
     && /opt/pgadmin/venv/bin/pip install pgadmin4 gunicorn
 
 # Override pgAdmin logging to /tmp
-RUN echo "LOG_FILE = '/tmp/pgadmin.log'" > /opt/pgadmin/venv/lib/python3.10/site-packages/pgadmin4/config_local.py
+RUN echo "LOG_FILE = '/tmp/pgadmin.log'" > /opt/pgadmin/venv/lib/python3.9/site-packages/pgadmin4/config_local.py
 
 # Set environment variables
 ENV PATH="/opt/pgadmin/venv/bin:$PATH"
