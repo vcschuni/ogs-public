@@ -84,19 +84,18 @@ oc new-app "$REPO" \
   -e POSTGRES_PASSWORD=password \
   --context-dir="compose/${APP}" \
   --strategy=docker \
-  --labels=app="${APP}" \
-  --allow-missing-images
+  --labels=app="${APP}"
   
 # ----------------------------
 # Attach PVC
 # ----------------------------
-# echo ">>> Attaching PVC..."
-# oc set volume deployment/"${APP}" \
-  # --add \
-  # --name=pgdata \
-  # --type=pvc \
-  # --claim-name="${APP}-data" \
-  # --mount-path=/pgdata
+echo ">>> Attaching PVC..."
+oc set volume deployment/"${APP}" \
+  --add \
+  --name="${APP}-data" \
+  --type=pvc \
+  --claim-name="${APP}-data" \
+  --mount-path=/bitnami/postgresql
 
 # ----------------------------
 # Rollout and expose internally
