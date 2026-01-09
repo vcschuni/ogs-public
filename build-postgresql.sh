@@ -2,14 +2,6 @@
 set -euo pipefail
 
 # ----------------------------
-# Notes
-# ----------------------------
-# Before executing this script, a postgres password must exist. The following command
-# can be used to do this:
-#    oc create secret generic ogs-postgres-password --from-literal=POSTGRES_PASSWORD=MyStrongSecret123
-#
-
-# ----------------------------
 # Config
 # ----------------------------
 APP="ogs-postgresql"
@@ -100,9 +92,9 @@ fi
 echo ">>> Deploying PostgreSQL..."
 oc new-app "$REPO" \
   --name="${APP}" \
-  -e POSTGRES_DB=gisdata \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=$(oc get secret ogs-postgres-password -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 --decode) \
+  -e POSTGRES_DB=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_DB}' | base64 --decode) \
+  -e POSTGRES_USER=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_SUPERUSER_USER}' | base64 --decode) \
+  -e POSTGRES_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_SUPERUSER_PASSWORD}' | base64 --decode) \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}" 
@@ -125,7 +117,7 @@ oc set volume deployment/"${APP}" \
 echo ">>> Waiting for PostgreSQL deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
-echo ">>> Exposing PostgreSQL internally on port 5432..."
+echo ">>> Exposing PostgreSQL internally..."
 oc expose deployment "${APP}" \
   --name="${APP}" \
   --port=5432 \
