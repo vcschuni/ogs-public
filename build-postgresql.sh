@@ -133,6 +133,11 @@ oc expose deployment "${APP}" \
   --labels=app="${APP}" | oc apply -f -
 
 # ----------------------------
+# Cleanup builds
+# ----------------------------
+oc delete builds -l app="${APP}" --ignore-not-found --wait=true
+
+# ----------------------------
 # Final status
 # ----------------------------
 echo ">>> COMPLETE — ${APP} deployed!"

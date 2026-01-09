@@ -79,6 +79,11 @@ oc expose service "${APP}" \
   --labels=app="${APP}"
 
 # ----------------------------
+# Cleanup builds
+# ----------------------------
+oc delete builds -l app="${APP}" --ignore-not-found --wait=true
+
+# ----------------------------
 # Final status
 # ----------------------------
 echo ">>> COMPLETE — ${APP} deployed!"
