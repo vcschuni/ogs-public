@@ -1,12 +1,20 @@
 FROM docker.osgeo.org/geoserver:2.28.0
 
-# Run as root temporarily
 USER root
 
-RUN apt-get update && apt-get install -y \
-    bash \
-    rsync \
-    nano \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Make temp dirs writable for arbitrary UID
+RUN mkdir -p /var/tmp /tmp \
+    && chmod 1777 /var/tmp /tmp
+
+# Force apt to use /var/tmp instead of /tmp
+ENV TMPDIR=/var/tmp
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        rsync \
+        nano \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 EXPOSE 8080
