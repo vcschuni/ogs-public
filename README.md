@@ -27,6 +27,10 @@ oc create secret generic ogs-postgresql \
 oc create secret generic ogs-pgadmin \
   --from-literal=PGADMIN_EMAIL=spatialadmin@gov.bc.ca \
   --from-literal=PGADMIN_PASSWORD=MyStrongSecret123
+  
+oc create secret generic ogs-geoserver \
+  --from-literal=GEOSERVER_ADMIN_USER=spatialadmin \
+  --from-literal=GEOSERVER_ADMIN_PASSWORD=MyStrongSecret123
 ```
 
 

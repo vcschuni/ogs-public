@@ -94,7 +94,15 @@ oc new-app "$REPO" \
   --name="${APP}" \
   --context-dir="compose/${APP}" \
   --strategy=docker \
-  --labels=app="${APP}"
+  --labels=app="${APP}" \
+  -e GEOSERVER_ADMIN_USER=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
+  -e GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
+  -e CATALINA_OPTS="-DPOSTGRESQL_DB=${POSTGRESQL_DB} -DPOSTGRESQL_RO_USER=${POSTGRESQL_RO_USER}"
+
+# ----------------------------
+# Inject secrets
+# ----------------------------
+oc set env deployment/"${APP}" --from=secret/"${APP}"
 
 # ----------------------------
 # Attach PVC
