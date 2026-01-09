@@ -1,13 +1,16 @@
 # OGS Public
 
-This repository contains the **OGS Public** application.
+This repository contains the **OGS Public** application which is designed to
+be built in the BCGov OpenShift Environment.
 
 ## Architecture
 
-- **Nginx** (port 8080): reverse proxy, rate limiting, caching - exposed externally
-- **GeoServer** (port 8080): an open source server for sharing geospatial data
+- **Nginx**: reverse proxy, rate limiting, caching - exposed externally
+- **GeoServer**: an open source server for sharing geospatial data
+- **PostgreSQL**: ...
+- **PGAdmin Web**: ...
 
-## OpenShift Build/Deployment in DEV
+## Build/Deployment in DEV
 
 ### Add secrets:
 
@@ -27,6 +30,6 @@ oc create secret generic ogs-pgadmin \
 ```
 
 
-## OpenShift Promotion from DEV to TEST
+## Promotion from DEV to TEST
 
-## OpenShift Promotion from TEST to PROD
+## Promotion from TEST to PROD
