@@ -1,7 +1,11 @@
-FROM nginx:latest
+# Use official HAProxy image
+FROM haproxy:2.8-alpine
 
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copy HAProxy configuration into the container
+COPY haproxy.cfg /usr/local/etc/haproxy/haproxy.cfg
 
+# Expose HTTP port
 EXPOSE 8080
 
-CMD ["nginx", "-g", "daemon off;"]
+# Start HAProxy in foreground
+CMD ["haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg", "-db"]
