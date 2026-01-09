@@ -71,7 +71,7 @@ EXECUTE FUNCTION update_modified_timestamp();
 
 -- Insert Border Crossing Data
 INSERT INTO poi (name, description, category, authority, geometry, created_by, modified_by)
-VALUES ('', 'AB/BC Border, Highway 1', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-116.284361, 51.453526), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
+VALUES ('AB/BC Border, Highway 1', 'AB/BC Border, Highway 1', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-116.284361, 51.453526), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
 
 INSERT INTO poi (name, description, category, authority, geometry, created_by, modified_by)
 VALUES ('Goodlow', 'AB/BC Border, Highway 103 (Goodlow)', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-120.0, 56.316299), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
@@ -80,7 +80,7 @@ INSERT INTO poi (name, description, category, authority, geometry, created_by, m
 VALUES ('Kelly Lake', 'AB/BC Border, Highway 11 (Kelly Lake)', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-120.0, 55.257893), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
 
 INSERT INTO poi (name, description, category, authority, geometry, created_by, modified_by)
-VALUES ('', 'AB/BC Border, Highway 16', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-118.448582, 52.88208), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
+VALUES ('AB/BC Border, Highway 16', 'AB/BC Border, Highway 16', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-118.448582, 52.88208), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
 
 INSERT INTO poi (name, description, category, authority, geometry, created_by, modified_by)
 VALUES ('Tupper', 'AB/BC Border, Highway 2 (Tupper)', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-120.0, 55.48058), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
@@ -92,7 +92,7 @@ INSERT INTO poi (name, description, category, authority, geometry, created_by, m
 VALUES ('Dawson Creek', 'AB/BC Border, Highway 49 (Dawson Creek)', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-120.0, 55.77819), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
 
 INSERT INTO poi (name, description, category, authority, geometry, created_by, modified_by)
-VALUES ('', 'AB/BC Border, Highway 93', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-116.050258, 51.228549), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
+VALUES ('AB/BC Border, Highway 93', 'AB/BC Border, Highway 93', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-116.050258, 51.228549), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
 
 INSERT INTO poi (name, description, category, authority, geometry, created_by, modified_by)
 VALUES ('Hyder/Stewart', 'AK/BC Border, Highway 37A (Hyder/Stewart)', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-130.017807, 55.912026), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
@@ -107,7 +107,7 @@ INSERT INTO poi (name, description, category, authority, geometry, created_by, m
 VALUES ('Roosville/Port of Roosville', 'MT/BC Border, Highway 93 (Roosville/Port of Roosville)', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-115.055898, 49.0), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
 
 INSERT INTO poi (name, description, category, authority, geometry, created_by, modified_by)
-VALUES ('', 'NT/BC Border, Highway 77', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-122.932806, 60.0), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
+VALUES ('NT/BC Border, Highway 77', 'NT/BC Border, Highway 77', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-122.932806, 60.0), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
 
 INSERT INTO poi (name, description, category, authority, geometry, created_by, modified_by)
 VALUES ('Huntingdon/Sumas', 'WA/BC Border, Highway 11 (Huntingdon/Sumas)', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-122.265219, 49.004678), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
@@ -146,8 +146,7 @@ INSERT INTO poi (name, description, category, authority, geometry, created_by, m
 VALUES ('Peach Arch', 'WA/BC Border, Highway 99 (Peace Arch)', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-122.755215373302391, 49.000490333275067), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
 
 INSERT INTO poi (name, description, category, authority, geometry, created_by, modified_by)
-VALUES ('', 'YT/BC Border, Highway 37', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-129.052641, 60.0), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
+VALUES ('YT/BC Border, Highway 37', 'YT/BC Border, Highway 37', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-129.052641, 60.0), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
 
 INSERT INTO poi (name, description, category, authority, geometry, created_by, modified_by)
-VALUES ('', 'YT/BC Border, Highway 97', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-128.545693, 60.0), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
-
+VALUES ('YT/BC Border, Highway 97', 'YT/BC Border, Highway 97', 'Border Crossing', 'Nicole Hilborne', ST_SetSRID(ST_Point(-128.545693, 60.0), 4326), 'Nicole Hilborne', 'Nicole Hilborne');
