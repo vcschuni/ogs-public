@@ -32,12 +32,7 @@ oc project "$PROJ"
 # Cleanup
 # ----------------------------
 echo ">>> Removing old ${APP} resources..."
-#oc delete all -l app="${APP}" --ignore-not-found --wait=true
-
-#oc delete service -l app="${APP}" --ignore-not-found --wait=true
-
-oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
-oc delete buildconfig -l app="${APP}" --ignore-not-found --wait=true
+oc delete all -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
 
@@ -117,12 +112,12 @@ oc set volume deployment/"${APP}" \
 echo ">>> Waiting for GeoServer deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
-# echo ">>> Exposing GeoServer internally..."
-# oc expose deployment "${APP}" \
-  # --name="${APP}" \
-  # --port=8080 \
-  # --dry-run=client -o yaml \
-  # --labels=app="${APP}" | oc apply -f -
+echo ">>> Exposing GeoServer internally..."
+oc expose deployment "${APP}" \
+  --name="${APP}" \
+  --port=8080 \
+  --dry-run=client -o yaml \
+  --labels=app="${APP}" | oc apply -f -
 
 # ----------------------------
 # Cleanup builds
