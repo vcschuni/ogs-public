@@ -98,12 +98,17 @@ oc new-app "$REPO" \
   --context-dir="compose/${APP}" \
   --strategy=docker \
   --labels=app="${APP}" 
-  
+ 
+# ----------------------------
+# Inject secrets
+# ----------------------------
+oc set env deployment/"${APP}" --from=secret/"${APP}"
+
 # ----------------------------
 # Attach PVC
 # ----------------------------
 echo ">>> Attaching PVC..."
-oc set volume deployment/ogs-postgresql --remove --all --confirm
+oc set volume deployment/"${APP}" --remove --all --confirm
 oc set volume deployment/"${APP}" \
   --add \
   --name="${APP}-data" \
