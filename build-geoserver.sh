@@ -120,6 +120,14 @@ oc expose deployment "${APP}" \
   --labels=app="${APP}" | oc apply -f -
 
 # ----------------------------
+# Expose Service Externally
+# ----------------------------
+echo ">>> Creating external route..."
+oc expose service "${APP}" \
+  --name="${APP}" \
+  --labels=app="${APP}"
+
+# ----------------------------
 # Cleanup builds
 # ----------------------------
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
