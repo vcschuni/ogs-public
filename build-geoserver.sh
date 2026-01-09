@@ -97,6 +97,11 @@ oc new-app "$REPO" \
   --labels=app="${APP}"
 
 # ----------------------------
+# Inject secrets into deployment
+# ----------------------------
+oc set env deployment/ogs-geoserver --from=secret/ogs-postgresql
+
+# ----------------------------
 # Attach PVC
 # ----------------------------
 echo ">>> Attaching PVC..."
