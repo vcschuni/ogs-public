@@ -7,9 +7,9 @@ This repository contains the **OGS Public** application.
 - **Nginx** (port 8080): reverse proxy, rate limiting, caching - exposed externally
 - **GeoServer** (port 8080): an open source server for sharing geospatial data
 
-## OpenShift Deployment (DEV)
+## OpenShift Build/Deployment in DEV
 
-Add secrets:
+# Add secrets:
 
 ```bash
 oc create secret generic ogs-postgresql \
@@ -25,3 +25,8 @@ oc create secret generic ogs-pgadmin \
   --from-literal=PGADMIN_EMAIL=spatialadmin@gov.bc.ca \
   --from-literal=PGADMIN_PASSWORD=MyStrongSecret123
 ```
+
+
+## OpenShift Promotion from DEV to TEST
+
+## OpenShift Promotion from TEST to PROD
