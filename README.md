@@ -9,7 +9,7 @@ This repository contains the **OGS Public** application.
 
 ## OpenShift Build/Deployment in DEV
 
-# Add secrets:
+### Add secrets:
 
 ```bash
 oc create secret generic ogs-postgresql \
