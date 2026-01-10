@@ -36,6 +36,8 @@ oc delete all -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
 
+oc delete pvc -l app="${APP}" --ignore-not-found --wait=true
+
 # ----------------------------
 # Stop here if remove was requested
 # ----------------------------
@@ -97,12 +99,7 @@ oc new-app "$REPO" \
   --labels=app="${APP}" \
   -e GEOSERVER_ADMIN_USER=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
   -e GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
-  -e CATALINA_OPTS="-DPOSTGRESQL_DB=${POSTGRESQL_DB} -DPOSTGRESQL_RO_USER=${POSTGRESQL_RO_USER}"
-
-# ----------------------------
-# Inject secrets
-# ----------------------------
-oc set env deployment/"${APP}" --from=secret/"${APP}"
+  -e CATALINA_OPTS="-DPOSTGRESQL_DB="$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_DB}' | base64 --decode)
 
 # ----------------------------
 # Attach PVC
