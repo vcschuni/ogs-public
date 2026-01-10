@@ -99,7 +99,7 @@ oc new-app "$REPO" \
   --labels=app="${APP}" \
   -e GEOSERVER_ADMIN_USER=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
   -e GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
-  -e SKIP_DEMO_DATA=True \
+  -e SKIP_DEMO_DATA=true \
   -e CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true"
 
 
