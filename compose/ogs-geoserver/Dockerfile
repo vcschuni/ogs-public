@@ -14,5 +14,7 @@ RUN apt-get update \
 		nano \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+	
+COPY geoserver-environment.properties /opt/geoserver_data/geoserver-environment.properties
 
 EXPOSE 8080
