@@ -5,7 +5,7 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-rproxy"
-PROJ="80c8d5-dev"
+PROJ=$(oc project -q)
 SERVICE_HOSTNAME="ogs-${PROJ}.apps.silver.devops.gov.bc.ca"
 REPO="https://github.com/vcschuni/ogs-public.git"
 
@@ -23,10 +23,29 @@ if [[ ! " ${OPTIONS[*]} " =~ " ${ACTION} " ]]; then
 fi
 
 # ----------------------------
-# Switch to DEV project
+# Confirm action
 # ----------------------------
-echo ">>> Switching to project $PROJ"
-oc project "$PROJ"
+echo
+echo "========================================"
+echo " About to do the following:"
+echo "----------------------------------------"
+echo " Action:            ${ACTION}"
+echo " App:               ${APP}"
+echo " Project:           ${PROJ}"
+echo " Repo:              ${REPO}"
+echo " Service Hostname:  ${SERVICE_HOSTNAME}"
+echo "========================================"
+echo
+read -r -p "Continue [y/N]: " CONFIRM
+case "${CONFIRM:-N}" in
+  [yY]|[yY][eE][sS])
+    echo ">>> Proceeding..."
+    ;;
+  *)
+    echo ">>> Cancelled"
+    exit 0
+    ;;
+esac
 
 # ----------------------------
 # Cleanup
