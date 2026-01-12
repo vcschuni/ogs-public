@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ----------------------------
+# Config
+# ----------------------------
+APP="ogs-postgresql"
+PROJ="80c8d5-dev"
+REPO="https://github.com/vcschuni/ogs-public.git"
+PVC_SIZE="1Gi"
+
+# ----------------------------
+# Verify passed arg and show help if required
+# ----------------------------
+OPTIONS=("deploy" "remove")
+ACTION="${1:-}"
+if [[ ! " ${OPTIONS[*]} " =~ " ${ACTION} " ]]; then
+    echo
+    echo "USAGE: $(basename "$0") <${OPTIONS[*]// /|}>"
+    echo "EXAMPLE: $(basename "$0") ${OPTIONS[0]}"
+    echo
+    exit 1
+fi
+
+# ----------------------------
+# Switch to DEV project
+# ----------------------------
+echo ">>> Switching to project $PROJ"
+oc project "$PROJ"
+
+# ----------------------------
+# Cleanup
+# ----------------------------
+echo ">>> Removing old ${APP} resources..."
+oc delete all -l app="${APP}" --ignore-not-found --wait=true
+oc delete builds -l app="${APP}" --ignore-not-found --wait=true
+oc delete is -l app="${APP}" --ignore-not-found --wait=true
+
+# ----------------------------
+# Stop here if remove was requested
+# ----------------------------
+if [[ "${ACTION}" == "remove" ]]; then
+	echo ""
+	echo ">>> Remove completed successfully"
+	echo ""
+	exit
+fi
+
+# ----------------------------
+# Create PVC if it doesn't exist
+# ----------------------------
+if ! oc get pvc "${APP}-data" &>/dev/null; then
+    echo ">>> Creating PVC for PostgreSQL data..."
+    oc apply -f - <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${APP}-data   
+  labels: 
+    app: ${APP}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: ${PVC_SIZE}
+EOF
+	echo ">>> Waiting for PVC for to be ready..."
+	COUNT=0
+	while true; do
+		STATUS=$(oc get pvc "${APP}-data" -o jsonpath='{.status.phase}')
+		echo "Current status: $STATUS"
+
+		if [[ "$STATUS" == "Bound" ]]; then
+			echo ">>> PVC is ready!"
+			break
+		fi
+		sleep 5
+		COUNT=$((COUNT+1))
+		if [[ $COUNT -ge 30 ]]; then
+			echo ">>> Timeout waiting for PVC!"
+			exit 1
+		fi
+	done
+else
+    echo ">>> PVC ${APP}-data already exists, skipping creation"
+fi
+
+# ----------------------------
+# Deploy PostgreSQL
+# ----------------------------
+echo ">>> Deploying PostgreSQL..."
+oc new-app "$REPO" \
+  --name="${APP}" \
+  -e POSTGRES_DB=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_DB}' | base64 --decode) \
+  -e POSTGRES_USER=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_SUPERUSER_USER}' | base64 --decode) \
+  -e POSTGRES_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_SUPERUSER_PASSWORD}' | base64 --decode) \
+  --context-dir="compose/${APP}" \
+  --strategy=docker \
+  --labels=app="${APP}" 
+ 
+# ----------------------------
+# Inject secrets
+# ----------------------------
+oc set env deployment/"${APP}" --from=secret/ogs-postgresql
+
+# ----------------------------
+# Attach PVC
+# ----------------------------
+echo ">>> Attaching PVC..."
+oc set volume deployment/"${APP}" --remove --all --confirm
+oc set volume deployment/"${APP}" \
+  --add \
+  --name="${APP}-data" \
+  --type=pvc \
+  --claim-name="${APP}-data" \
+  --mount-path=/bitnami/postgresql
+
+# ----------------------------
+# Rollout and expose internally
+# ----------------------------
+echo ">>> Waiting for PostgreSQL deployment rollout..."
+oc rollout status deployment/"${APP}" --timeout=300s
+
+echo ">>> Exposing PostgreSQL internally..."
+oc expose deployment "${APP}" \
+  --name="${APP}" \
+  --port=5432 \
+  --dry-run=client -o yaml \
+  --labels=app="${APP}" | oc apply -f -
+
+# ----------------------------
+# Cleanup builds
+# ----------------------------
+oc delete builds -l app="${APP}" --ignore-not-found --wait=true
+
+# ----------------------------
+# Final status
+# ----------------------------
+echo ">>> COMPLETE — ${APP} deployed!"
