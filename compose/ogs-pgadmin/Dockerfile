@@ -2,7 +2,7 @@
 FROM docker.io/debian:bullseye-slim
 
 # Run as root temporarily
-USER root
+#USER root
 
 # Install Python and dependencies
 RUN apt-get update && apt-get install -y \
@@ -28,13 +28,12 @@ ENV PATH="/opt/pgadmin/venv/bin:$PATH"
 ENV SCRIPT_NAME=/pgadmin
 ENV PGADMIN_LISTEN_PORT=8080
 ENV PGADMIN_SERVER_MODE=True 
-ENV PGADMIN_DATA_DIR=/tmp/pgadmin-data
 
 # Expose port
 EXPOSE 8080
 
 # Run as non-root OpenShift UID
-USER 1001
+#USER 1001
 
 # Start pgAdmin with Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
