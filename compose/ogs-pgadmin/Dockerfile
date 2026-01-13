@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
 	nano \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /var/lib/pgadmin && chown -R 1001:0 /var/lib/pgadmin
+
 # Create virtual environment and install pgAdmin4 + Gunicorn
 RUN python3.9 -m venv /opt/pgadmin/venv \
     && /opt/pgadmin/venv/bin/pip install --upgrade pip \
