@@ -5,7 +5,6 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-pgadmin"
-PROJ=$(oc project -q)
 REPO="https://github.com/vcschuni/ogs-public.git"
 PVC_SIZE="500Mi"
 
@@ -21,6 +20,11 @@ if [[ ! " ${OPTIONS[*]} " =~ " ${ACTION} " ]]; then
     echo
     exit 1
 fi
+
+# ----------------------------
+# Get current project
+# ----------------------------
+PROJ=$(oc project -q)
 
 # ----------------------------
 # Confirm action

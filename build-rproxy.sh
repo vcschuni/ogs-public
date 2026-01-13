@@ -5,9 +5,8 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-rproxy"
-PROJ=$(oc project -q)
-SERVICE_HOSTNAME="ogs-${PROJ}.apps.silver.devops.gov.bc.ca"
 REPO="https://github.com/vcschuni/ogs-public.git"
+SERVICE_HOSTNAME="ogs-${PROJ}.apps.silver.devops.gov.bc.ca"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -21,6 +20,11 @@ if [[ ! " ${OPTIONS[*]} " =~ " ${ACTION} " ]]; then
     echo
     exit 1
 fi
+
+# ----------------------------
+# Get current project
+# ----------------------------
+PROJ=$(oc project -q)
 
 # ----------------------------
 # Confirm action
