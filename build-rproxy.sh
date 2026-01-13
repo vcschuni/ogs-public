@@ -27,8 +27,6 @@ fi
 # ----------------------------
 echo
 echo "========================================"
-echo " About to do the following:"
-echo "----------------------------------------"
 echo " Action:            ${ACTION}"
 echo " App:               ${APP}"
 echo " Project:           ${PROJ}"
@@ -36,7 +34,7 @@ echo " Repo:              ${REPO}"
 echo " Service Hostname:  ${SERVICE_HOSTNAME}"
 echo "========================================"
 echo
-read -r -p "Continue [y/N]: " CONFIRM
+read -r -p "Continue? [y/N]: " CONFIRM
 case "${CONFIRM:-N}" in
   [yY]|[yY][eE][sS])
     echo ">>> Proceeding..."
