@@ -28,7 +28,7 @@ ENV PATH="/opt/pgadmin/venv/bin:$PATH"
 ENV SCRIPT_NAME=/pgadmin
 ENV PGADMIN_LISTEN_PORT=8080
 ENV PGADMIN_SERVER_MODE=True 
-PGADMIN_DATA_DIR=/tmp/pgadmin-data
+ENV PGADMIN_DATA_DIR=/tmp/pgadmin-data
 
 # Expose port
 EXPOSE 8080
