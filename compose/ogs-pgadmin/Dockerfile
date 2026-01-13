@@ -1,5 +1,5 @@
 # Start from Debian slim
-FROM debian:bullseye-slim
+FROM docker.io/debian:bullseye-slim
 
 # Run as root temporarily
 USER root
