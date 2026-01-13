@@ -9,6 +9,10 @@ RUN apt-get update && apt-get install -y \
     python3.9 python3.9-venv python3-pip \
     libpq-dev build-essential \
     curl \
+	bash \
+	rsync \
+	ssh \
+	nano \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment and install pgAdmin4 + Gunicorn
