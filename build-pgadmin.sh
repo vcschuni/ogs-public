@@ -34,7 +34,6 @@ echo "========================================"
 echo " Action:            ${ACTION}"
 echo " App:               ${APP}"
 echo " Project:           ${PROJ}"
-echo " Repo:              ${REPO}"
 echo "========================================"
 echo
 read -r -p "Continue? [y/N]: " CONFIRM
@@ -153,7 +152,7 @@ oc set volume deployment/"${APP}" \
 # ----------------------------
 # Rollout and expose internally
 # ----------------------------
-echo ">>> Waiting for pgadmin deployment rollout..."
+echo ">>> Waiting for deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
 if ! oc get service "${APP}" &>/dev/null; then
