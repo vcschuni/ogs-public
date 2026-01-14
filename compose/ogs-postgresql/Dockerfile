@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
 	rsync \
 	ssh \
 	nano \
+	cron \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set timezone to Pacific (BC)
@@ -19,4 +20,4 @@ COPY initdb.d/create_users.sh /docker-entrypoint-initdb.d/
 
 # Copy backup script
 COPY backup-databases.sh /opt/scripts/
-
+RUN chmod +x /opt/scripts/*.sh
