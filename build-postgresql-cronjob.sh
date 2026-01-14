@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ----------------------------
+# Config
+# ----------------------------
+APP="ogs-postgresql-cronjob"
+TARGET_IMAGE="ogs-postgresql:latest"
+TARGET_SCRIPT="/opt/scripts/backup-databases.sh"
+SCHEDULE="25 * * * *"
+PVC_SIZE="5Gi"
+
+# ----------------------------
+# Verify passed arg and show help if required
+# ----------------------------
+OPTIONS=("deploy" "remove")
+ACTION="${1:-}"
+if [[ ! " ${OPTIONS[*]} " =~ " ${ACTION} " ]]; then
+    echo
+    echo "USAGE: $(basename "$0") <${OPTIONS[*]// /|}>"
+    echo "EXAMPLE: $(basename "$0") ${OPTIONS[0]}"
+    echo
+    exit 1
+fi
+
+# ----------------------------
+# Get current project
+# ----------------------------
+PROJ=$(oc project -q)
+
+# ----------------------------
+# Confirm action
+# ----------------------------
+echo
+echo "========================================"
+echo " Action:            ${ACTION}"
+echo " App:               ${APP}"
+echo " Project:           ${PROJ}"
+echo "========================================"
+echo
+read -r -p "Continue? [y/N]: " CONFIRM
+case "${CONFIRM:-N}" in
+  [yY]|[yY][eE][sS])
+    echo ">>> Proceeding..."
+    ;;
+  *)
+    echo ">>> Cancelled"
+    exit 0
+    ;;
+esac
+
+# ----------------------------
+# Cleanup
+# ----------------------------
+echo ">>> Removing old ${APP} resources..."
+oc delete cronjob "${APP}-backup-cron" --cascade=background --ignore-not-found --wait=true
+
+# ----------------------------
+# Stop here if remove was requested
+# ----------------------------
+if [[ "${ACTION}" == "remove" ]]; then
+	echo ""
+	echo ">>> Remove completed successfully"
+	echo ""
+	exit
+fi
+
+# ----------------------------
+# Create PVC if it doesn't exist
+# ----------------------------
+if ! oc get pvc "${APP}-data" &>/dev/null; then
+    echo ">>> Creating PVC for data..."
+    oc apply -f - <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${APP}-data
+  labels: 
+    app: ${APP} 
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: ${PVC_SIZE}
+EOF
+	echo ">>> Waiting for PVC to be ready..."
+	COUNT=0
+	while true; do
+		STATUS=$(oc get pvc "${APP}-data" -o jsonpath='{.status.phase}')
+		echo "Current status: $STATUS"
+		if [[ "$STATUS" == "Bound" ]]; then
+			echo ">>> PVC is ready!"
+			break
+		fi
+		sleep 5
+		COUNT=$((COUNT+1))
+		if [[ $COUNT -ge 30 ]]; then
+			echo ">>> Timeout waiting for PVC!"
+			exit 1
+		fi
+	done
+else
+    echo ">>> PVC ${APP}-data already exists, skipping creation"
+fi
+
+# ----------------------------
+# Set cronjob
+# ----------------------------
+echo ">>> Creating cronjob..."
+oc create cronjob "${APP}" \
+  --schedule="${SCHEDULE}" \
+  --image=image-registry.openshift-image-registry.svc:5000/"${PROJ}"/"${TARGET_IMAGE}" \
+  -- "${TARGET_SCRIPT}"
+  
+# ----------------------------
+# Attach PVC
+# ----------------------------
+echo ">>> Attaching PVC..."
+oc set volume cronjob/"${APP}" \
+    --add \
+	--name="${APP}-data" \
+    --type=pvc \
+    --claim-name="${APP}-data" \
+    --mount-path=/backup
+
+# ----------------------------
+# Final status
+# ----------------------------
+echo
+echo ">>> COMPLETE — ${APP} deployed!"
+echo
