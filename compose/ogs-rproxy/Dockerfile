@@ -1,4 +1,4 @@
-FROM nginx:1.28.1
+FROM nginx:latest
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
