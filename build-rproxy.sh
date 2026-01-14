@@ -79,8 +79,8 @@ fi
 # Needs to match Dockerfile
 # ----------------------------
 echo ">>> Import base image..."
-oc import-image nginx:1.29-alpine \
-	--from=docker.io/nginx:1.29-alpine \
+oc import-image nginx:1.27-24.04_stable \
+	--from=docker.io/ubuntu/nginx:1.27-24.04_stable \
 	--confirm
 
 # ----------------------------
