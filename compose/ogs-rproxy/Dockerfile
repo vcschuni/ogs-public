@@ -1,4 +1,4 @@
-FROM docker.io/bitnami/nginx:1.28.1
+FROM nginx:1.22-ubi9
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
