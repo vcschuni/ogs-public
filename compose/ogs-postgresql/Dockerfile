@@ -1,4 +1,4 @@
-FROM registry-1.docker.io/bitnami/postgresql:17
+FROM docker.io/postgis/postgis:18-3.6
 
 # Set timezone to Pacific (BC)
 ENV TZ=America/Vancouver
