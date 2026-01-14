@@ -17,3 +17,6 @@ COPY initdb.d/*.sql /docker-entrypoint-initdb.d/
 # Copy the shell script
 COPY initdb.d/create_users.sh /docker-entrypoint-initdb.d/
 
+# Copy backup script
+COPY backup-databases.sh /opt/scripts/
+
