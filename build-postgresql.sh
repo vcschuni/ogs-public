@@ -56,6 +56,7 @@ oc delete bc -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
+oc delete cronjob "${APP}-backup-cron" --cascade=true --ignore-not-found --wait=true
 
 # ----------------------------
 # Stop here if remove was requested
@@ -178,6 +179,14 @@ if ! oc get service "${APP}" &>/dev/null; then
 	  --labels=app="${APP}" \
 	  --dry-run=client -o yaml | oc apply -f -
 fi
+
+# ----------------------------
+# Set cronjob
+# ----------------------------
+oc create cronjob "${APP}-backup-cron" \
+  --schedule="25 * * * *" \
+  --image=image-registry.openshift-image-registry.svc:5000/"${PROJ}"/"${APP}":latest \
+  -- /opt/scripts/backup-databases.sh
 
 # ----------------------------
 # Cleanup builds
