@@ -21,3 +21,9 @@ COPY initdb.d/create_users.sh /docker-entrypoint-initdb.d/
 # Copy backup script
 COPY backup-databases.sh /opt/scripts/
 RUN chmod +x /opt/scripts/*.sh
+
+# Append cron entry
+RUN echo "0 5 * * * postgres /opt/scripts/backup-databases.sh >> /backup/db-backup.log 2>&1" >> /etc/crontab
+
+# Start cron in the background, then start postgres
+CMD cron && docker-entrypoint.sh postgres
