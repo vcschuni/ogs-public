@@ -68,6 +68,15 @@ if [[ "${ACTION}" == "remove" ]]; then
 fi
 
 # ----------------------------
+# Import base image
+# Needs to match Dockerfile
+# ----------------------------
+echo ">>> Import base image..."
+oc import-image geoserver:2.28.0 \
+	--from=docker.osgeo.org/geoserver:2.28.0 \
+	--confirm
+
+# ----------------------------
 # Create the build config
 # ----------------------------
 echo ">>> Creating/updating BuildConfig..."
