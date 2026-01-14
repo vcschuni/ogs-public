@@ -1,4 +1,4 @@
-FROM docker.io/nginx:1.28.1
+FROM docker.io/nginx:latest
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
