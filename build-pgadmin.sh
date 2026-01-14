@@ -145,7 +145,7 @@ oc set env deployment/"${APP}" \
 echo ">>> Attaching PVC..."
 oc set volume deployment/"${APP}" \
     --add \
-	--name=pgadmin-data \
+	--name="${APP}-data" \
     --type=pvc \
     --claim-name="${APP}-data" \
     --mount-path=/var/lib/pgadmin
