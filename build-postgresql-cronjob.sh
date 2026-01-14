@@ -8,6 +8,7 @@ APP="ogs-postgresql-cronjob"
 TARGET_IMAGE="ogs-postgresql:latest"
 TARGET_SCRIPT="/opt/scripts/backup-databases.sh"
 SCHEDULE="25 * * * *"
+PVC_NAME="ogs-postgresql-backup"
 PVC_SIZE="5Gi"
 
 # ----------------------------
@@ -68,15 +69,15 @@ fi
 # ----------------------------
 # Create PVC if it doesn't exist
 # ----------------------------
-if ! oc get pvc "${APP}-data" &>/dev/null; then
+if ! oc get pvc "${PVC_NAME}" &>/dev/null; then
     echo ">>> Creating PVC for data..."
     oc apply -f - <<EOF
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ${APP}-data
+  name: ${PVC_NAME}
   labels: 
-    app: ${APP} 
+    app: ${PVC_NAME} 
 spec:
   accessModes:
     - ReadWriteOnce
@@ -87,7 +88,7 @@ EOF
 	echo ">>> Waiting for PVC to be ready..."
 	COUNT=0
 	while true; do
-		STATUS=$(oc get pvc "${APP}-data" -o jsonpath='{.status.phase}')
+		STATUS=$(oc get pvc "${PVC_NAME}" -o jsonpath='{.status.phase}')
 		echo "Current status: $STATUS"
 		if [[ "$STATUS" == "Bound" ]]; then
 			echo ">>> PVC is ready!"
@@ -101,7 +102,7 @@ EOF
 		fi
 	done
 else
-    echo ">>> PVC ${APP}-data already exists, skipping creation"
+    echo ">>> PVC ${PVC_NAME} already exists, skipping creation"
 fi
 
 # ----------------------------
@@ -119,9 +120,9 @@ oc create cronjob "${APP}" \
 echo ">>> Attaching PVC..."
 oc set volume cronjob/"${APP}" \
     --add \
-	--name="${APP}-data" \
+	--name="${PVC_NAME}" \
     --type=pvc \
-    --claim-name="${APP}-data" \
+    --claim-name="${PVC_NAME}" \
     --mount-path=/backup
 
 # ----------------------------
