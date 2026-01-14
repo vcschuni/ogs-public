@@ -52,8 +52,10 @@ esac
 # Cleanup
 # ----------------------------
 echo ">>> Removing old ${APP} resources..."
-oc delete all -l app="${APP}" --ignore-not-found --wait=true
+[[ "${ACTION}" == "remove" ]] && oc delete service -l app="${APP}" --ignore-not-found --wait=true
+oc delete bc -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
+oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
@@ -85,12 +87,11 @@ spec:
     requests:
       storage: ${PVC_SIZE}
 EOF
-	echo ">>> Waiting for PVC for to be ready..."
+	echo ">>> Waiting for PVC to be ready..."
 	COUNT=0
 	while true; do
 		STATUS=$(oc get pvc "${APP}-data" -o jsonpath='{.status.phase}')
 		echo "Current status: $STATUS"
-
 		if [[ "$STATUS" == "Bound" ]]; then
 			echo ">>> PVC is ready!"
 			break
@@ -107,17 +108,37 @@ else
 fi
 
 # ----------------------------
-# Deploy pgadmin
+# Create the build config
 # ----------------------------
-echo ">>> Deploying pgadmin..."
-oc new-app "$REPO" \
-  --name="${APP}" \
-  --context-dir="compose/${APP}" \
-  --strategy=docker \
-  --labels=app="${APP}" \
-  -e PGADMIN_SETUP_EMAIL=$(oc get secret ogs-pgadmin -o jsonpath='{.data.PGADMIN_EMAIL}' | base64 --decode) \
-  -e PGADMIN_SETUP_PASSWORD=$(oc get secret ogs-pgadmin -o jsonpath='{.data.PGADMIN_PASSWORD}' | base64 --decode)
-  
+echo ">>> Creating/updating BuildConfig..."
+oc new-build "$REPO" \
+	--name="${APP}" \
+	--context-dir="compose/${APP}" \
+	--strategy=docker \
+	--labels=app="${APP}"
+
+# ----------------------------
+# Start the build
+# ----------------------------
+echo ">>> Starting build from repo..."
+oc start-build "${APP}" --wait
+
+# ----------------------------
+# Create deployment
+# ----------------------------
+echo ">>> Applying Deployment with new image..."
+oc create deployment "${APP}" \
+    --image="image-registry.openshift-image-registry.svc:5000/${PROJ}/${APP}:latest" \
+    --dry-run=client -o yaml | oc apply -f -
+oc label deployment "${APP}" app="${APP}" --overwrite
+
+# ----------------------------
+# Inject runtime variables
+# ----------------------------
+oc set env deployment/"${APP}" \
+    PGADMIN_SETUP_EMAIL=$(oc get secret ogs-pgadmin -o jsonpath='{.data.PGADMIN_EMAIL}' | base64 --decode) \
+    PGADMIN_SETUP_PASSWORD=$(oc get secret ogs-pgadmin -o jsonpath='{.data.PGADMIN_PASSWORD}' | base64 --decode)
+
 # ----------------------------
 # Attach PVC
 # ----------------------------
@@ -128,19 +149,21 @@ oc set volume deployment/"${APP}" \
     --type=pvc \
     --claim-name="${APP}-data" \
     --mount-path=/var/lib/pgadmin
-	
+
 # ----------------------------
 # Rollout and expose internally
 # ----------------------------
 echo ">>> Waiting for pgadmin deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
-echo ">>> Exposing pgadmin internally..."
-oc expose deployment "${APP}" \
-  --name="${APP}" \
-  --port=8080 \
-  --dry-run=client -o yaml \
-  --labels=app="${APP}" | oc apply -f -
+if ! oc get service "${APP}" &>/dev/null; then
+	echo ">>> Creating internal service..."
+	oc expose deployment "${APP}" \
+	  --name="${APP}" \
+	  --port=8080 \
+	  --labels=app="${APP}" \
+	  --dry-run=client -o yaml | oc apply -f -
+fi
 
 # ----------------------------
 # Cleanup builds
@@ -150,4 +173,7 @@ oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 # ----------------------------
 # Final status
 # ----------------------------
+echo
 echo ">>> COMPLETE — ${APP} deployed!"
+echo ">>> To rollback: oc rollout undo deployment/${APP}"
+echo
