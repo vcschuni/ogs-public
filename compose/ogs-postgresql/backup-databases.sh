@@ -4,19 +4,10 @@
 # Configuration
 # -----------------------------
 DB_USER="postgres"
-BACKUP_DIR="/tmp/database-backups"
-RETENTION_DAYS=7
+BACKUP_DIR="/backup"
+RETENTION_DAYS=14
 DATABASES=("postgres" "gisdata")
 DATESTAMP=$(date +'%Y%m%d_%H')
-
-# -----------------------------
-# Prepare backup directory
-# -----------------------------
-if [ ! -d "$BACKUP_DIR" ]; then
-	echo
-    echo "Creating backup directory: $BACKUP_DIR"
-    mkdir -p "$BACKUP_DIR"
-fi
 
 # -----------------------------
 # Backup loop

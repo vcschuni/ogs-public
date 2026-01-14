@@ -6,7 +6,16 @@ set -euo pipefail
 # ----------------------------
 APP="ogs-postgresql"
 REPO="https://github.com/vcschuni/ogs-public.git"
-PVC_SIZE="1Gi"
+declare -A PVC_SIZES
+declare -A PVC_MOUNTS
+PVC_SIZES=(
+    ["${APP}-data"]="2Gi"
+    ["${APP}-backup"]="5Gi"
+)
+PVC_MOUNTS=(
+    ["${APP}-data"]="/var/lib/postgresql"
+    ["${APP}-backup"]="/backup"
+)
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -56,7 +65,7 @@ oc delete bc -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
-oc delete cronjob "${APP}-backup-cron" --cascade=true --ignore-not-found --wait=true
+oc delete cronjob "${APP}-backup-cron" --cascade=background --ignore-not-found --wait=true
 
 # ----------------------------
 # Stop here if remove was requested
@@ -68,44 +77,49 @@ if [[ "${ACTION}" == "remove" ]]; then
 	exit
 fi
 
-# ----------------------------
-# Create PVC if it doesn't exist
-# ----------------------------
-if ! oc get pvc "${APP}-data" &>/dev/null; then
-    echo ">>> Creating PVC for data..."
-    oc apply -f - <<EOF
+# -----------------------------
+# Loop over PVCs to create/check
+# -----------------------------
+for PVC in "${!PVC_SIZES[@]}"; do
+    SIZE="${PVC_SIZES[$PVC]}"
+    MOUNT="${PVC_MOUNTS[$PVC]}"
+
+    if ! oc get pvc "$PVC" &>/dev/null; then
+        echo ">>> Creating PVC $PVC with size $SIZE..."
+        oc apply -f - <<EOF
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ${APP}-data
-  labels: 
-    app: ${APP} 
+  name: $PVC
+  labels:
+    app: $PVC
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: ${PVC_SIZE}
+      storage: $SIZE
 EOF
-	echo ">>> Waiting for PVC to be ready..."
-	COUNT=0
-	while true; do
-		STATUS=$(oc get pvc "${APP}-data" -o jsonpath='{.status.phase}')
-		echo "Current status: $STATUS"
-		if [[ "$STATUS" == "Bound" ]]; then
-			echo ">>> PVC is ready!"
-			break
-		fi
-		sleep 5
-		COUNT=$((COUNT+1))
-		if [[ $COUNT -ge 30 ]]; then
-			echo ">>> Timeout waiting for PVC!"
-			exit 1
-		fi
-	done
-else
-    echo ">>> PVC ${APP}-data already exists, skipping creation"
-fi
+        echo ">>> Waiting for PVC $PVC to be ready..."
+        COUNT=0
+        while true; do
+            STATUS=$(oc get pvc "$PVC" -o jsonpath='{.status.phase}')
+            echo "Current status of $PVC: $STATUS"
+            if [[ "$STATUS" == "Bound" ]]; then
+                echo ">>> PVC $PVC is ready!"
+                break
+            fi
+            sleep 5
+            COUNT=$((COUNT+1))
+            if [[ $COUNT -ge 30 ]]; then
+                echo ">>> Timeout waiting for PVC $PVC!"
+                exit 1
+            fi
+        done
+    else
+        echo ">>> PVC $PVC already exists, skipping creation"
+    fi
+done
 
 # ----------------------------
 # Import base image
@@ -154,16 +168,21 @@ oc set env deployment/"${APP}" \
 # ----------------------------
 oc set env deployment/"${APP}" --from=secret/ogs-postgresql
 
-# ----------------------------
-# Attach PVC
-# ----------------------------
-echo ">>> Attaching PVC..."
-oc set volume deployment/"${APP}" \
-    --add \
-	--name="${APP}-data" \
-    --type=pvc \
-    --claim-name="${APP}-data" \
-    --mount-path=/var/lib/postgresql
+# -----------------------------
+# Attach PVCs to Deployment
+# -----------------------------
+for PVC in "${!PVC_MOUNTS[@]}"; do
+    MOUNT="${PVC_MOUNTS[$PVC]}"
+    echo ">>> Attaching PVC $PVC to Deployment $APP at $MOUNT ..."
+
+    oc set volume deployment/"${APP}" \
+        --add \
+        --name="$PVC" \
+        --type=pvc \
+        --claim-name="$PVC" \
+        --mount-path="$MOUNT" \
+        --overwrite
+done
 
 # ----------------------------
 # Rollout and expose internally
@@ -183,7 +202,7 @@ fi
 # ----------------------------
 # Set cronjob
 # ----------------------------
-oc create cronjob "${APP}-backup-cron" \
+oc create cronjob "${APP}-backup-cronjob" \
   --schedule="25 * * * *" \
   --image=image-registry.openshift-image-registry.svc:5000/"${PROJ}"/"${APP}":latest \
   -- /opt/scripts/backup-databases.sh
