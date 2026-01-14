@@ -1,4 +1,4 @@
-FROm docker.io/bitnami/nginx:latest
+FROM docker.io/bitnami/nginx:1.28.1
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
