@@ -75,6 +75,15 @@ if [[ "${ACTION}" == "remove" ]]; then
 fi
 
 # ----------------------------
+# Import base image
+# Needs to match Dockerfile
+# ----------------------------
+echo ">>> Import base image..."
+oc import-image nginx:1.29-alpine \
+	--from=docker.io/nginx:1.29-alpine \
+	--confirm
+
+# ----------------------------
 # Create BuildConfig
 # ----------------------------
 echo ">>> Creating/updating BuildConfig..."

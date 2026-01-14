@@ -1,4 +1,4 @@
-FROM nginx:1.22-ubi9
+FROM docker.io/nginx:1.29-alpine
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
