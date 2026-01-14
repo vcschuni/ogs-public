@@ -107,6 +107,15 @@ else
 fi
 
 # ----------------------------
+# Import base image
+# Needs to match Dockerfile
+# ----------------------------
+echo ">>> Import base image..."
+oc import-image debian:bullseye-slim \
+	--from=docker.io/debian:bullseye-slim \
+	--confirm
+
+# ----------------------------
 # Create the build config
 # ----------------------------
 echo ">>> Creating/updating BuildConfig..."
