@@ -7,7 +7,7 @@ set -euo pipefail
 APP="ogs-postgresql-cronjob"
 TARGET_IMAGE="ogs-postgresql:latest"
 TARGET_SCRIPT="/opt/scripts/backup-databases.sh"
-SCHEDULE="25 * * * *"
+SCHEDULE="0 6,18 * * *"
 PVC_NAME="ogs-postgresql-backup"
 PVC_SIZE="5Gi"
 
@@ -113,6 +113,11 @@ oc create cronjob "${APP}" \
   --schedule="${SCHEDULE}" \
   --image=image-registry.openshift-image-registry.svc:5000/"${PROJ}"/"${TARGET_IMAGE}" \
   -- "${TARGET_SCRIPT}"
+
+# ----------------------------
+# Set cronjob limits
+# ----------------------------
+oc patch cronjob "${APP}" --type=merge -p '{"spec":{"successfulJobsHistoryLimit":1,"failedJobsHistoryLimit":1}}'
 
 # ----------------------------
 # Inject secrets

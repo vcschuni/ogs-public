@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # -----------------------------
 # Configuration (from environment)
@@ -14,6 +15,41 @@ DATABASES=("postgres" "gisdata")
 DATESTAMP=$(date +'%Y%m%d_%H')
 
 # -----------------------------
+# Start header
+# -----------------------------
+START_TS=$(date +"%Y-%m-%d %H:%M:%S %Z")
+START_EPOCH=$(date +%s)
+
+echo "========================================"
+echo " PostgreSQL Backup Job START"
+echo " Start Time : ${START_TS}"
+echo " Host       : $(hostname)"
+echo "========================================"
+echo
+
+# -----------------------------
+# Footer (always runs)
+# -----------------------------
+EXIT_CODE=0
+footer() {
+    END_TS=$(date +"%Y-%m-%d %H:%M:%S %Z")
+    END_EPOCH=$(date +%s)
+    DURATION=$((END_EPOCH - START_EPOCH))
+    DURATION_FMT=$(printf "%02d:%02d:%02d" $((DURATION/3600)) $((DURATION%3600/60)) $((DURATION%60)))
+
+    echo
+    echo "========================================"
+    echo " PostgreSQL Backup Job END"
+    echo " End Time   : ${END_TS}"
+    echo " Duration   : ${DURATION_FMT}"
+    echo " Exit Code  : ${EXIT_CODE}"
+    echo "========================================"
+    echo
+}
+
+trap 'EXIT_CODE=$?; footer' EXIT
+
+# -----------------------------
 # Export password for pg_dump
 # -----------------------------
 export PGPASSWORD="$DB_PASSWORD"
@@ -26,16 +62,14 @@ for DB_NAME in "${DATABASES[@]}"; do
     echo
     echo "Backing up database '${DB_NAME}' to '${BACKUP_FILE}'..."
 
-    # Use TCP connection with host and port
-    pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -F c -Z 9 -f "${BACKUP_FILE}"
-
-    if [ $? -eq 0 ]; then
+    # pg_dump with error handling
+    if ! pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -F c -Z 9 -f "${BACKUP_FILE}"; then
+        echo "Backup of '${DB_NAME}' failed!"
+        EXIT_CODE=1
+    else
         echo "Backup of '${DB_NAME}' successful."
         echo "To restore this backup:"
-        echo "  - log into the pod with access to the database"
-        echo "  - pg_restore -h $DB_HOST -p $DB_PORT -U $DB_USER -d ${DB_NAME} -v ${BACKUP_FILE}"
-    else
-        echo "Backup of '${DB_NAME}' failed!"
+        echo "  pg_restore -h $DB_HOST -p $DB_PORT -U $DB_USER -d ${DB_NAME} -v ${BACKUP_FILE}"
     fi
 done
 
