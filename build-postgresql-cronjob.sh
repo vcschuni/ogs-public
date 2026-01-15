@@ -112,7 +112,7 @@ echo ">>> Creating cronjob..."
 oc create cronjob "${APP}" \
   --schedule="${SCHEDULE}" \
   --image=image-registry.openshift-image-registry.svc:5000/"${PROJ}"/"${TARGET_IMAGE}" \
-  -- "${TARGET_SCRIPT}"
+  -- /bin/sh -c "${TARGET_SCRIPT} 2>&1 | tee -a /backup/backup.log"
 
 # ----------------------------
 # Set cronjob limits
