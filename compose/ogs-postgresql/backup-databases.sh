@@ -25,7 +25,6 @@ echo " PostgreSQL Backup Job START"
 echo " Start Time : ${START_TS}"
 echo " Host       : $(hostname)"
 echo "========================================"
-echo
 
 # -----------------------------
 # Footer (always runs)
@@ -69,7 +68,7 @@ for DB_NAME in "${DATABASES[@]}"; do
     else
         echo "Backup of '${DB_NAME}' successful."
         echo "To restore this backup:"
-        echo "  pg_restore -h $DB_HOST -p $DB_PORT -U $DB_USER -d ${DB_NAME} -v ${BACKUP_FILE}"
+        echo " >>> pg_restore -h $DB_HOST -p $DB_PORT -U $DB_USER -d ${DB_NAME} -v ${BACKUP_FILE}"
     fi
 done
 
@@ -80,4 +79,3 @@ echo
 echo "Cleaning up backups older than ${RETENTION_DAYS} days in $BACKUP_DIR..."
 find "$BACKUP_DIR" -type f -name "*.dump" -mtime +$RETENTION_DAYS -exec rm -f {} \;
 echo "Backup and cleanup completed."
-echo

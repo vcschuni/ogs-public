@@ -118,6 +118,7 @@ oc create cronjob "${APP}" \
 # Set cronjob limits
 # ----------------------------
 oc patch cronjob "${APP}" --type=merge -p '{"spec":{"successfulJobsHistoryLimit":1,"failedJobsHistoryLimit":1}}'
+oc patch cronjob "${APP}" --type=merge -p '{"spec":{"concurrencyPolicy":"Forbid"}}'
 
 # ----------------------------
 # Inject secrets
