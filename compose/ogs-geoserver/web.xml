@@ -170,21 +170,45 @@
 
     <!-- Uncomment following filter to enable CORS in Tomcat. Do not forget the second config block further down. -->
     <filter>
-       <filter-name>cross-origin</filter-name>
-       <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
-       <init-param>
-         <param-name>cors.allowed.origins</param-name>
-         <param-value>*</param-value>
-       </init-param>
-       <init-param>
-         <param-name>cors.allowed.methods</param-name>
-         <param-value>GET,POST,PUT,DELETE,HEAD,OPTIONS</param-value>
-       </init-param>
-       <init-param>
-         <param-name>cors.allowed.headers</param-name>
-         <param-value>*</param-value>
-       </init-param>
-    </filter>
+		<filter-name>cross-origin</filter-name>
+		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+
+		<!-- Allow all origins -->
+		<init-param>
+			<param-name>cors.allowed.origins</param-name>
+			<param-value>*</param-value>
+		</init-param>
+
+		<!-- Allowed HTTP methods -->
+		<init-param>
+			<param-name>cors.allowed.methods</param-name>
+			<param-value>GET,POST,PUT,DELETE,HEAD,OPTIONS</param-value>
+		</init-param>
+
+		<!-- Allowed headers in requests -->
+		<init-param>
+			<param-name>cors.allowed.headers</param-name>
+			<param-value>*,Content-Type,Accept,X-Requested-With</param-value>
+		</init-param>
+
+		<!-- Headers exposed to the browser -->
+		<init-param>
+			<param-name>cors.exposed.headers</param-name>
+			<param-value>Location,Content-Location,ETag</param-value>
+		</init-param>
+
+		<!-- Support credentials if needed -->
+		<init-param>
+			<param-name>cors.support.credentials</param-name>
+			<param-value>true</param-value>
+		</init-param>
+
+		<!-- How long preflight responses can be cached (in seconds) -->
+		<init-param>
+			<param-name>cors.preflight.maxage</param-name>
+			<param-value>1800</param-value>
+		</init-param>
+	</filter>
 
     <!--
       THIS FILTER MAPPING MUST BE THE FIRST ONE, otherwise we end up with ruined chars in the input from the GUI
