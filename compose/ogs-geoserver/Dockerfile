@@ -19,4 +19,7 @@ RUN apt-get update \
 COPY ./data /opt/geoserver_data
 RUN chgrp -R 0 /opt/geoserver_data && chmod -R g=u /opt/geoserver_data
 
+# Inject custom web.xml
+COPY web.xml /usr/local/tomcat/webapps/geoserver/WEB-INF/web.xml
+
 EXPOSE 8080
