@@ -20,6 +20,20 @@ COPY ./data /opt/geoserver_data
 RUN chgrp -R 0 /opt/geoserver_data && chmod -R g=u /opt/geoserver_data
 
 # Inject custom web.xml
-COPY web.xml /usr/local/tomcat/webapps/geoserver/WEB-INF/web.xml
+#COPY web.xml /usr/local/tomcat/webapps/geoserver/WEB-INF/web.xml
+
+# Make GeoServer proxy-aware (OpenShift HTTPS)
+RUN sed -i '/<context-param>/i \
+    <filter>\n\
+      <filter-name>forwardedHeaderFilter</filter-name>\n\
+      <filter-class>org.springframework.web.filter.ForwardedHeaderFilter</filter-class>\n\
+    </filter>' \
+    /usr/local/tomcat/webapps/geoserver/WEB-INF/web.xml && \
+    sed -i '/Set Character Encoding/{n; a\
+    <filter-mapping>\n\
+      <filter-name>forwardedHeaderFilter</filter-name>\n\
+      <url-pattern>/*</url-pattern>\n\
+    </filter-mapping>' \
+    /usr/local/tomcat/webapps/geoserver/WEB-INF/web.xml
 
 EXPOSE 8080
