@@ -66,11 +66,13 @@
         <param-value>classpath*:/applicationContext.xml classpath*:/applicationSecurityContext.xml</param-value>
     </context-param>
 
-    <!-- Make GeoServer aware of HTTPS when behind OpenShift router -->
-    <filter>
+    <!-- OGS Custom Addition -->
+    <!--
+	<filter>
         <filter-name>forwardedHeaderFilter</filter-name>
         <filter-class>org.springframework.web.filter.ForwardedHeaderFilter</filter-class>
     </filter>
+	-->
 
     <filter>
         <filter-name>FlushSafeFilter</filter-name>
@@ -198,16 +200,21 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 	
+	<!-- OGS Custom Addition -->
+	<!--
 	<filter-mapping>
         <filter-name>forwardedHeaderFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+	-->
 
     <!-- Uncomment following filter-mapping to enable CORS -->
-    <filter-mapping>
+    <!--
+	<filter-mapping>
         <filter-name>cross-origin</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+	-->
 
     <filter-mapping>
         <filter-name>FlushSafeFilter</filter-name>
