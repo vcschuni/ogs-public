@@ -88,7 +88,13 @@ oc new-build "$REPO" \
 	-e GEOSERVER_ADMIN_USER=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
 	-e GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
 	-e CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
-	-e JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" 
+	-e JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
+	-e POSTGRES_JNDI_ENABLED= true \
+	-e POSTGRES_HOST=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_HOST}' | base64 --decode) \
+	-e POSTGRES_PORT=5432
+	-e POSTGRES_DB=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_AUTH_DB}' | base64 --decode) \
+	-e POSTGRES_USERNAME=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_AUTH_USER}' | base64 --decode) \
+	-e POSTGRES_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_AUTH_PASSWORD}' | base64 --decode)
 	
 # ----------------------------
 # Start the build
