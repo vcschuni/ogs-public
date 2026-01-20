@@ -14,6 +14,9 @@ RUN apt-get update \
 		nano \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Make and set permissions for extensions/plugins
+RUN mkdir /opt/additional_libs/ && chgrp -R 0 /opt/additional_libs/ && chmod -R g=u /opt/additional_libs/
 	
 # Copy GeoServer data directory and set permissions
 #COPY ./data /opt/geoserver_data
