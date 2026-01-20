@@ -109,10 +109,11 @@ oc label deployment "${APP}" app="${APP}" --overwrite
 # Inject runtime variables
 # ----------------------------
 oc set env deployment/"${APP}" \
-    GEOSERVER_ADMIN_USER=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
+    GEOSERVER_ADMIN_USERNAME=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
     GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
-    JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+    JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
+	FLYWAY_BASELINE_ON_MIGRATE=true
 
 # ----------------------------
 # Inject secrets
