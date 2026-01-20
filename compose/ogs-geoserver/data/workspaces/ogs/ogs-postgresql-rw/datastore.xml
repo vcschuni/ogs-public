@@ -13,7 +13,7 @@
     <entry key="encode functions">true</entry>
     <entry key="Batch insert size">1</entry>
     <entry key="preparedStatements">false</entry>
-    <entry key="database">${POSTGRESQL_DB}</entry>
+    <entry key="database">${POSTGRESQL_DATA_DB}</entry>
     <entry key="reWriteBatchedInserts">false</entry>
     <entry key="host">${POSTGRESQL_HOST}</entry>
     <entry key="Loose bbox">true</entry>

@@ -145,7 +145,7 @@ oc label deployment "${APP}" app="${APP}" --overwrite
 # Inject runtime variables
 # ----------------------------
 oc set env deployment/"${APP}" \
-	POSTGRES_DB=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_DB}' | base64 --decode) \
+	POSTGRES_DB=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_DATA_DB}' | base64 --decode) \
 	POSTGRES_USER=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_SUPERUSER_USER}' | base64 --decode) \
 	POSTGRES_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_SUPERUSER_PASSWORD}' | base64 --decode)
 

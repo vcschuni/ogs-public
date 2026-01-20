@@ -31,13 +31,16 @@ oc project <your dev project name>
 ```bash
 oc create secret generic ogs-postgresql \
   --from-literal=POSTGRESQL_HOST=ogs-postgresql \
-  --from-literal=POSTGRESQL_DB=mydata \
+  --from-literal=POSTGRESQL_DATA_DB=mydata \
+  --from-literal=POSTGRESQL_AUTH_DB=myauthorizationdb \
   --from-literal=POSTGRESQL_SUPERUSER_USER=postgres \
   --from-literal=POSTGRESQL_SUPERUSER_PASSWORD=***password*** \
   --from-literal=POSTGRESQL_RO_USER=ro_user \
   --from-literal=POSTGRESQL_RO_PASSWORD=***password*** \
   --from-literal=POSTGRESQL_RW_USER=rw_user \
-  --from-literal=POSTGRESQL_RW_PASSWORD=***password***
+  --from-literal=POSTGRESQL_RW_PASSWORD=***password*** \
+  --from-literal=POSTGRESQL_AUTH_USER=auth_user \
+  --from-literal=POSTGRESQL_AUTH_PASSWORD=***password***
 
 oc create secret generic ogs-pgadmin \
   --from-literal=PGADMIN_EMAIL=admin@example.com \
