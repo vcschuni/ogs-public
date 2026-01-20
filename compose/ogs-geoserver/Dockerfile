@@ -15,9 +15,11 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Make and set permissions for extensions/plugins
-RUN mkdir /opt/additional_libs/ && chgrp -R 0 /opt/additional_libs/ && chmod -R g=u /opt/additional_libs/
-	
+# Copy custom extensions and set permissions
+RUN mkdir /opt/additional_libs
+COPY ./extensions/* /opt/additional_libs/
+RUN chgrp -R 0 /opt/additional_libs && chmod -R g=u /opt/additional_libs
+
 # Copy GeoServer data directory and set permissions
 #COPY ./data /opt/geoserver_data
 RUN chgrp -R 0 /opt/geoserver_data && chmod -R g=u /opt/geoserver_data
