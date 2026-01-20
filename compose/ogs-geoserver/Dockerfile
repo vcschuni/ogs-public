@@ -16,7 +16,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 	
 # Copy GeoServer data directory and set permissions
-COPY ./data /opt/geoserver_data
+#COPY ./data /opt/geoserver_data
 RUN chgrp -R 0 /opt/geoserver_data && chmod -R g=u /opt/geoserver_data
 
 # Inject custom web.xml

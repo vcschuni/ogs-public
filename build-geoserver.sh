@@ -91,7 +91,7 @@ oc new-build "$REPO" \
 	-e CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
 	-e JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
 	-e INSTALL_EXTENSIONS=true \
-	-e STABLE_EXTENSIONS="jdbcconfig" \
+	-e COMMUNITY_EXTENSIONS="jdbcconfig" \
 	-e POSTGRES_JNDI_ENABLED=true \
 	-e POSTGRES_HOST=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_HOST}' | base64 --decode) \
 	-e POSTGRES_PORT=5432 \
