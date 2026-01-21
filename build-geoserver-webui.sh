@@ -113,7 +113,7 @@ oc set env deployment/"${APP}" \
 	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_PASSWORD}' | base64 --decode) \
 	PGCONFIG_SCHEMA=public \
 	PGCONFIG_INITIALIZE=true \
-	SERVER_SERVLET_CONTEXT_PATH=/geoserver \
+	SERVER_SERVLET_CONTEXT_PATH=/geoserver/webui \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
 	SPRING_CLOUD_BUS_ENABLED=false \
