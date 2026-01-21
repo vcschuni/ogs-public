@@ -120,11 +120,6 @@ oc set env deployment/"${APP}" \
 	FLYWAY_BASELINE_ON_MIGRATE=true
 
 # ----------------------------
-# Inject secrets
-# ----------------------------
-#oc set env deployment/"${APP}" --from=secret/ogs-geoserver
-
-# ----------------------------
 # Set resources and autoscaler
 # ----------------------------
 oc set resources deployment/"${APP}" --limits=cpu=2,memory=2Gi --requests=cpu=500m,memory=1.5Gi

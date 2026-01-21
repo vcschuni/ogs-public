@@ -71,7 +71,7 @@ fi
 # Import base image
 # ----------------------------
 echo ">>> Import base image..."
-oc import-image geoserver-cloud-wfs:2.28.1.3
+oc import-image geoserver-cloud-wfs:2.28.1.3 \
     --from=docker.io/geoservercloud/geoserver-cloud-wfs:2.28.1.3 \
     --confirm
 
@@ -111,16 +111,18 @@ oc label deployment "${APP}" app="${APP}" --overwrite
 oc set env deployment/"${APP}" \
     GEOSERVER_ADMIN_USERNAME=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
     GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
-    SERVER_SERVLET_CONTEXT_PATH=/geoserver/wfs \
+	PGCONFIG_HOST=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_HOST}' | base64 --decode) \
+	PGCONFIG_PORT=5432 \
+	PGCONFIG_DATABASE=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_DB}' | base64 --decode) \
+	PGCONFIG_USERNAME=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_USER}' | base64 --decode) \
+	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_PASSWORD}' | base64 --decode) \
+	PGCONFIG_SCHEMA=public \
+	PGCONFIG_INITIALIZE=true \
+	SERVER_SERVLET_CONTEXT_PATH=/geoserver/webui \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
-    SPRING_CLOUD_BUS_ENABLED=false \
-    FLYWAY_BASELINE_ON_MIGRATE=true
-
-# ----------------------------
-# Inject secrets
-# ----------------------------
-oc set env deployment/"${APP}" --from=secret/ogs-geoserver
+	SPRING_CLOUD_BUS_ENABLED=false \
+	FLYWAY_BASELINE_ON_MIGRATE=true
 
 # ----------------------------
 # Set resources and autoscaler
