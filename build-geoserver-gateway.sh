@@ -5,7 +5,8 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-geoserver-gateway"
-IMAGE="docker.io/geoservercloud/geoserver-cloud-gateway:2.28.1.3"
+IMAGENAME="geoserver-cloud-gateway:2.28.1.3"
+IMAGEURL="docker.io/geoservercloud/${IMAGENAME}"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -69,8 +70,8 @@ fi
 # Import base image
 # ----------------------------
 echo ">>> Import base image..."
-oc import-image geoserver-cloud-gateway:2.28.1.3 \
-    --from=$IMAGE \
+oc import-image $IMAGENAME \
+    --from=$IMAGEURL \
     --confirm
 
 # ----------------------------
@@ -87,9 +88,9 @@ oc label deployment "${APP}" app="${APP}" --overwrite
 # ----------------------------
 oc set env deployment/"${APP}" \
     SPRING_PROFILES_ACTIVE=gateway_service,standalone \
-    GATEWAY_SERVICE_ROUTES_WFS=http://ogs-geoserver-wfs:8080/geoserver \
-    GATEWAY_SERVICE_ROUTES_WMS=http://ogs-geoserver-wms:8080/geoserver \
-    GATEWAY_SERVICE_ROUTES_WEBUI=http://ogs-geoserver-webui:8080/geoserver \
+    GATEWAY_SERVICE_ROUTES_WFS=http://ogs-geoserver-wfs:8080/geoserver/wfs \
+    GATEWAY_SERVICE_ROUTES_WMS=http://ogs-geoserver-wms:8080/geoserver/wms \
+    GATEWAY_SERVICE_ROUTES_WEBUI=http://ogs-geoserver-webui:8080/geoserver/webui \
     GEOSERVER_ADMIN_USERNAME=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
     GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \

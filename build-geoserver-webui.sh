@@ -5,7 +5,8 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-geoserver-webui"
-REPO="https://github.com/vcschuni/ogs-public.git"
+IMAGENAME="geoserver-cloud-webui:2.28.1.3"
+IMAGEURL="docker.io/geoservercloud/${IMAGENAME}"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -71,32 +72,16 @@ fi
 # Import base image
 # ----------------------------
 echo ">>> Import base image..."
-oc import-image geoserver-cloud-webui:2.28.1.3 \
-    --from=docker.io/geoservercloud/geoserver-cloud-webui:2.28.1.3 \
+oc import-image "${IMAGENAME}" \
+    --from="${IMAGEURL}" \
     --confirm
-
-# ----------------------------
-# Create the build config
-# ----------------------------
-echo ">>> Creating/updating BuildConfig..."
-oc new-build "$REPO" \
-    --name="${APP}" \
-    --context-dir="compose/ogs-geoserver-cloud/webui" \
-    --strategy=docker \
-    --labels=app="${APP}" 
-
-# ----------------------------
-# Start the build
-# ----------------------------
-echo ">>> Starting build from repo..."
-oc start-build "${APP}" --wait
 
 # ----------------------------
 # Create deployment
 # ----------------------------
-echo ">>> Applying Deployment with new image..."
+echo ">>> Creating deployment..."
 oc create deployment "${APP}" \
-    --image="image-registry.openshift-image-registry.svc:5000/${PROJ}/${APP}:latest" \
+    --image="${IMAGEURL}" \
     --dry-run=client -o yaml | oc apply -f -
 oc label deployment "${APP}" app="${APP}" --overwrite
 
@@ -113,6 +98,7 @@ oc set env deployment/"${APP}" \
 	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_PASSWORD}' | base64 --decode) \
 	PGCONFIG_SCHEMA=public \
 	PGCONFIG_INITIALIZE=true \
+	SERVER_SERVLET_CONTEXT_PATH=/geoserver/webui \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
 	SPRING_CLOUD_BUS_ENABLED=false \
