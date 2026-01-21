@@ -4,7 +4,7 @@ set -euo pipefail
 # ----------------------------
 # Config
 # ----------------------------
-APP="ogs-geoserver-webui"
+APP="ogs-geoserver"
 REPO="https://github.com/vcschuni/ogs-public.git"
 
 # ----------------------------
@@ -81,7 +81,7 @@ oc import-image geoserver-cloud-webui:2.28.1.3 \
 echo ">>> Creating/updating BuildConfig..."
 oc new-build "$REPO" \
     --name="${APP}" \
-    --context-dir="compose/ogs-geoserver-cloud/webui" \
+    --context-dir="compose/ogs-geoserver-cloud" \
     --strategy=docker \
     --labels=app="${APP}" 
 
@@ -117,6 +117,7 @@ oc set env deployment/"${APP}" \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
 	SPRING_CLOUD_BUS_ENABLED=false \
+	SPRING_PROFILES_ACTIVE=wfs_service,wms_service,webui,standalone \
 	FLYWAY_BASELINE_ON_MIGRATE=true
 
 # ----------------------------
