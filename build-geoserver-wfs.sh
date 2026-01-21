@@ -81,14 +81,9 @@ oc import-image geoserver-cloud-wfs:2.28.1.3 \
 echo ">>> Creating/updating BuildConfig..."
 oc new-build "$REPO" \
     --name="${APP}" \
-    --context-dir="compose/ogs-geoserver-cloud/wfs"
+    --context-dir="compose/ogs-geoserver-cloud/wfs" \
     --strategy=docker \
-    --labels=app="${APP}" \
-    -e SKIP_DEMO_DATA=true \
-    -e GEOSERVER_ADMIN_USER=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
-    -e GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
-    -e CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
-    -e JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+    --labels=app="${APP}"
 
 # ----------------------------
 # Start the build
@@ -118,17 +113,16 @@ oc set env deployment/"${APP}" \
 	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_PASSWORD}' | base64 --decode) \
 	PGCONFIG_SCHEMA=public \
 	PGCONFIG_INITIALIZE=true \
-	SERVER_SERVLET_CONTEXT_PATH=/geoserver/webui \
+	SERVER_SERVLET_CONTEXT_PATH=/geoserver/wfs \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
-	SPRING_CLOUD_BUS_ENABLED=false \
 	FLYWAY_BASELINE_ON_MIGRATE=true
 
 # ----------------------------
 # Set resources and autoscaler
 # ----------------------------
 oc set resources deployment/"${APP}" --limits=cpu=2,memory=2Gi --requests=cpu=500m,memory=1.5Gi
-oc autoscale deployment/"${APP}" --min=1 --max=1 --cpu-percent=80
+oc autoscale deployment/"${APP}" --min=1 --max=2 --cpu-percent=80
 
 # ----------------------------
 # Rollout

@@ -1,86 +1,156 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ----------------------------
+# Config
+# ----------------------------
 APP="ogs-geoserver-wms"
-CONTEXT="compose/ogs-geoserver-cloud/wms"
 REPO="https://github.com/vcschuni/ogs-public.git"
+
+# ----------------------------
+# Verify passed arg and show help if required
+# ----------------------------
 OPTIONS=("deploy" "remove")
 ACTION="${1:-}"
-PROJ=$(oc project -q)
-
 if [[ ! " ${OPTIONS[*]} " =~ " ${ACTION} " ]]; then
     echo
-    echo "USAGE: $(basename "$0") <deploy|remove>"
+    echo "USAGE: $(basename "$0") <${OPTIONS[*]// /|}>"
+    echo "EXAMPLE: $(basename "$0") ${OPTIONS[0]}"
+    echo
     exit 1
 fi
 
+# ----------------------------
+# Get current project
+# ----------------------------
+PROJ=$(oc project -q)
+
+# ----------------------------
+# Confirm action
+# ----------------------------
 echo
 echo "========================================"
-echo " Action:   ${ACTION}"
-echo " Project:  ${PROJ}"
-echo " Service:  ${APP}"
+echo " Action:            ${ACTION}"
+echo " App:               ${APP}"
+echo " Project:           ${PROJ}"
 echo "========================================"
+echo
 read -r -p "Continue? [y/N]: " CONFIRM
-[[ "${CONFIRM:-N}" =~ ^[yY] ]] || exit 0
+case "${CONFIRM:-N}" in
+  [yY]|[yY][eE][sS])
+    echo ">>> Proceeding..."
+    ;;
+  *)
+    echo ">>> Cancelled"
+    exit 0
+    ;;
+esac
 
+# ----------------------------
 # Cleanup
-oc delete service -l app="${APP}" --ignore-not-found --wait=true
-oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
+# ----------------------------
+echo ">>> Removing old ${APP} resources..."
+[[ "${ACTION}" == "remove" ]] && oc delete service -l app="${APP}" --ignore-not-found --wait=true
 oc delete bc -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
+oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
 oc delete hpa "${APP}" --ignore-not-found --wait=true
 
-[[ "${ACTION}" == "remove" ]] && exit 0
+# ----------------------------
+# Stop here if remove was requested
+# ----------------------------
+if [[ "${ACTION}" == "remove" ]]; then
+    echo ""
+    echo ">>> Remove completed successfully"
+    echo ""
+    exit
+fi
 
-# Build
+# ----------------------------
+# Import base image
+# ----------------------------
+echo ">>> Import base image..."
+oc import-image geoserver-cloud-wms:2.28.1.3 \
+    --from=docker.io/geoservercloud/geoserver-cloud-wms:2.28.1.3 \
+    --confirm
+
+# ----------------------------
+# Create the build config
+# ----------------------------
+echo ">>> Creating/updating BuildConfig..."
 oc new-build "$REPO" \
-  --name="${APP}" \
-  --context-dir="${CONTEXT}" \
-  --strategy=docker \
-  --labels=app="${APP}"
+    --name="${APP}" \
+    --context-dir="compose/ogs-geoserver-cloud/wms" \
+    --strategy=docker \
+    --labels=app="${APP}"
 
+# ----------------------------
+# Start the build
+# ----------------------------
+echo ">>> Starting build from repo..."
 oc start-build "${APP}" --wait
 
-# Deploy
+# ----------------------------
+# Create deployment
+# ----------------------------
+echo ">>> Applying Deployment with new image..."
 oc create deployment "${APP}" \
-  --image="image-registry.openshift-image-registry.svc:5000/${PROJ}/${APP}:latest" \
-  --dry-run=client -o yaml | oc apply -f -
-
+    --image="image-registry.openshift-image-registry.svc:5000/${PROJ}/${APP}:latest" \
+    --dry-run=client -o yaml | oc apply -f -
 oc label deployment "${APP}" app="${APP}" --overwrite
 
-# Inject secrets
+# ----------------------------
+# Inject runtime variables
+# ----------------------------
 oc set env deployment/"${APP}" \
-  --from=secret/ogs-geoserver-cloud \
-  --from=secret/ogs-postgresql \
-  --from=secret/ogs-geoserver
+    GEOSERVER_ADMIN_USERNAME=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
+    GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
+	PGCONFIG_HOST=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_HOST}' | base64 --decode) \
+	PGCONFIG_PORT=5432 \
+	PGCONFIG_DATABASE=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_DB}' | base64 --decode) \
+	PGCONFIG_USERNAME=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_USER}' | base64 --decode) \
+	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_PASSWORD}' | base64 --decode) \
+	PGCONFIG_SCHEMA=public \
+	PGCONFIG_INITIALIZE=true \
+	SERVER_SERVLET_CONTEXT_PATH=/geoserver/wms \
+    CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
+    JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
+	FLYWAY_BASELINE_ON_MIGRATE=true
 
-# JVM
-oc set env deployment/"${APP}" \
-  JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+# ----------------------------
+# Set resources and autoscaler
+# ----------------------------
+oc set resources deployment/"${APP}" --limits=cpu=2,memory=2Gi --requests=cpu=500m,memory=1.5Gi
+oc autoscale deployment/"${APP}" --min=1 --max=2 --cpu-percent=80
 
-# Resources
-oc set resources deployment/"${APP}" \
-  --limits=cpu=2,memory=2Gi \
-  --requests=cpu=500m,memory=1Gi
-
-# Autoscale
-oc autoscale deployment/"${APP}" \
-  --min=1 --max=3 --cpu-percent=80
-
-# Service
-oc expose deployment "${APP}" \
-  --name="${APP}" \
-  --port=8080 \
-  --labels=app="${APP}" \
-  --dry-run=client -o yaml | oc apply -f -
-
+# ----------------------------
 # Rollout
+# ----------------------------
+echo ">>> Waiting for deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
+# ----------------------------
+# Expose internal service
+# ----------------------------
+if ! oc get service "${APP}" &>/dev/null; then
+    echo ">>> Creating internal service..."
+    oc expose deployment "${APP}" \
+      --name="${APP}" \
+      --port=8080 \
+      --labels=app="${APP}" \
+      --dry-run=client -o yaml | oc apply -f -
+fi
+
+# ----------------------------
 # Cleanup builds
+# ----------------------------
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 
+# ----------------------------
+# Final status
+# ----------------------------
 echo
-echo ">>> ${APP} deployed successfully!"
-echo "Rollback: oc rollout undo deployment/${APP}"
+echo ">>> COMPLETE — ${APP} deployed!"
+echo ">>> To rollback: oc rollout undo deployment/${APP}"
+echo
