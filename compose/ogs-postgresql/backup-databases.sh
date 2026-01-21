@@ -11,7 +11,7 @@ DB_PORT="${POSTGRESQL_PORT:-5432}"
 
 BACKUP_DIR="/backup"
 RETENTION_DAYS=14
-DATABASES=("postgres" "gisdata")
+DATABASES=("postgres" "gisdata" "ogs_configuration")
 DATESTAMP=$(date +'%Y%m%d_%H')
 
 # -----------------------------
