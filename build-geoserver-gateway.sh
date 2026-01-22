@@ -79,6 +79,10 @@ oc label deployment "${APP}" app="${APP}" --overwrite
 # ----------------------------
 oc set env deployment/"${APP}" \
 	SPRING_PROFILES_ACTIVE=gateway_service,standalone \
+	SPRING_WEB_CORS_ALLOWED_ORIGINS=* \
+	SPRING_WEB_CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,OPTIONS,HEAD \
+	SPRING_WEB_CORS_ALLOWED_HEADERS=* \
+	SPRING_WEB_CORS_ALLOW_CREDENTIALS=false \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 
