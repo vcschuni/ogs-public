@@ -91,7 +91,6 @@ oc set env deployment/"${APP}" \
 	PGCONFIG_INITIALIZE=true \
 	SPRING_PROFILES_ACTIVE="standalone,pgconfig" \
 	SPRING_CLOUD_BUS_ENABLED=false \
-	SERVER_SERVLET_CONTEXT_PATH=/geoserver/webui \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
 	FLYWAY_BASELINE_ON_MIGRATE=true
@@ -114,7 +113,7 @@ oc rollout status deployment/"${APP}" --timeout=300s
 if ! oc get service "${APP}" &>/dev/null; then
     echo ">>> Creating internal service..."
     oc expose deployment "${APP}" \
-      --name="${APP}" \
+      --name=webui \
       --port=8080 \
       --labels=app="${APP}" \
       --dry-run=client -o yaml | oc apply -f -
