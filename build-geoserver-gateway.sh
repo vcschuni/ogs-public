@@ -5,8 +5,7 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-geoserver-gateway"
-IMAGENAME="geoserver-cloud-gateway:2.28.1.3"
-IMAGEURL="docker.io/geoservercloud/${IMAGENAME}"
+IMAGE="docker.io/geoservercloud/geoserver-cloud-gateway:2.28.1.3"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -25,6 +24,11 @@ fi
 # Get current project
 # ----------------------------
 PROJ=$(oc project -q)
+
+# ----------------------------
+# Define hostname
+# ----------------------------
+SERVICE_HOSTNAME="ogs2-${PROJ}.apps.silver.devops.gov.bc.ca"
 
 # ----------------------------
 # Confirm action
@@ -67,14 +71,6 @@ if [[ "${ACTION}" == "remove" ]]; then
 fi
 
 # ----------------------------
-# Import base image
-# ----------------------------
-echo ">>> Import base image..."
-oc import-image $IMAGENAME \
-    --from=$IMAGEURL \
-    --confirm
-
-# ----------------------------
 # Create deployment
 # ----------------------------
 echo ">>> Creating deployment..."
@@ -87,12 +83,12 @@ oc label deployment "${APP}" app="${APP}" --overwrite
 # Inject runtime variables
 # ----------------------------
 oc set env deployment/"${APP}" \
-    SPRING_PROFILES_ACTIVE=gateway_service,standalone \
+    GEOSERVER_ADMIN_USERNAME=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
+    GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
+	SPRING_PROFILES_ACTIVE=gateway_service,standalone \
     GATEWAY_SERVICE_ROUTES_WFS=http://ogs-geoserver-wfs:8080/geoserver/wfs \
     GATEWAY_SERVICE_ROUTES_WMS=http://ogs-geoserver-wms:8080/geoserver/wms \
     GATEWAY_SERVICE_ROUTES_WEBUI=http://ogs-geoserver-webui:8080/geoserver/webui \
-    GEOSERVER_ADMIN_USERNAME=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
-    GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 
@@ -118,6 +114,26 @@ if ! oc get service "${APP}" &>/dev/null; then
       --port=8080 \
       --labels=app="${APP}" \
       --dry-run=client -o yaml | oc apply -f -
+fi
+
+# ----------------------------
+# Expose external route
+# ----------------------------
+if ! oc get route "${APP}" &>/dev/null; then
+  echo ">>> Creating external route..."
+  oc expose service "${APP}" \
+    --name="${APP}" \
+    --hostname="${SERVICE_HOSTNAME}"
+
+  echo ">>> Enabling HTTPS..."
+  oc patch route "${APP}" -p '{
+    "spec": {
+      "tls": {
+        "termination": "edge",
+        "insecureEdgeTerminationPolicy": "Redirect"
+      }
+    }
+  }'
 fi
 
 # ----------------------------

@@ -68,25 +68,11 @@ if [[ "${ACTION}" == "remove" ]]; then
 fi
 
 # ----------------------------
-# Import base image
-# ----------------------------
-echo ">>> Import base image..."
-oc import-image $IMAGENAME \
-    --from=$IMAGEURL \
-    --confirm
-
-# ----------------------------
-# Start the build
-# ----------------------------
-echo ">>> Starting build from repo..."
-oc start-build "${APP}" --wait
-
-# ----------------------------
 # Create deployment
 # ----------------------------
-echo ">>> Applying Deployment with new image..."
+echo ">>> Creating deployment..."
 oc create deployment "${APP}" \
-    --image="image-registry.openshift-image-registry.svc:5000/${PROJ}/${APP}:latest" \
+    --image="${IMAGE}" \
     --dry-run=client -o yaml | oc apply -f -
 oc label deployment "${APP}" app="${APP}" --overwrite
 
@@ -103,6 +89,7 @@ oc set env deployment/"${APP}" \
 	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_PASSWORD}' | base64 --decode) \
 	PGCONFIG_SCHEMA=public \
 	PGCONFIG_INITIALIZE=true \
+	SPRING_PROFILES_ACTIVE="standalone,pgconfig" \
 	SERVER_SERVLET_CONTEXT_PATH=/geoserver/wfs \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \

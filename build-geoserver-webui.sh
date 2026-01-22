@@ -5,8 +5,7 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-geoserver-webui"
-IMAGENAME="geoserver-cloud-webui:2.28.1.3"
-IMAGEURL="docker.io/geoservercloud/${IMAGENAME}"
+IMAGE="docker.io/geoservercloud/geoserver-cloud-webui:2.28.1.3"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -69,19 +68,11 @@ if [[ "${ACTION}" == "remove" ]]; then
 fi
 
 # ----------------------------
-# Import base image
-# ----------------------------
-echo ">>> Import base image..."
-oc import-image "${IMAGENAME}" \
-    --from="${IMAGEURL}" \
-    --confirm
-
-# ----------------------------
 # Create deployment
 # ----------------------------
 echo ">>> Creating deployment..."
 oc create deployment "${APP}" \
-    --image="${IMAGEURL}" \
+    --image="${IMAGE}" \
     --dry-run=client -o yaml | oc apply -f -
 oc label deployment "${APP}" app="${APP}" --overwrite
 
@@ -98,10 +89,11 @@ oc set env deployment/"${APP}" \
 	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_PASSWORD}' | base64 --decode) \
 	PGCONFIG_SCHEMA=public \
 	PGCONFIG_INITIALIZE=true \
+	SPRING_PROFILES_ACTIVE="standalone,pgconfig" \
+	SPRING_CLOUD_BUS_ENABLED=false \
 	SERVER_SERVLET_CONTEXT_PATH=/geoserver/webui \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
-	SPRING_CLOUD_BUS_ENABLED=false \
 	FLYWAY_BASELINE_ON_MIGRATE=true
 
 # ----------------------------
