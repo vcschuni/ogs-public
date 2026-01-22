@@ -22,3 +22,6 @@ RUN chmod -R 777 /scripts
 
 # Set working directory
 WORKDIR /scripts
+
+# Keep container running for interactive use
+CMD ["/bin/bash"]
