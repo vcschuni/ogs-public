@@ -4,8 +4,8 @@ set -euo pipefail
 # ----------------------------
 # Config
 # ----------------------------
-APP="ogs-geoserver-gateway"
-IMAGE="docker.io/geoservercloud/geoserver-cloud-gateway:2.28.1.3"
+APP="ogs-worker"
+REPO="https://github.com/vcschuni/ogs-public.git"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -50,47 +50,59 @@ esac
 # Cleanup
 # ----------------------------
 echo ">>> Removing old ${APP} resources..."
-[[ "${ACTION}" == "remove" ]] && oc delete service -l app="${APP}" --ignore-not-found --wait=true
+oc delete bc -l app="${APP}" --ignore-not-found --wait=true
+oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
-oc delete hpa "${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
 # Stop here if remove was requested
 # ----------------------------
 if [[ "${ACTION}" == "remove" ]]; then
-    echo ""
-    echo ">>> Remove completed successfully"
-    echo ""
-    exit
+	echo ""
+	echo ">>> Remove completed successfully"
+	echo ""
+	exit
 fi
+
+# ----------------------------
+# Import base image
+# Needs to match Dockerfile
+# ----------------------------
+echo ">>> Import base image..."
+oc import-image debian:bullseye-slim \
+	--from=docker.io/debian:bullseye-slim \
+	--confirm
+
+# ----------------------------
+# Create the build config
+# ----------------------------
+echo ">>> Creating/updating BuildConfig..."
+oc new-build "$REPO" \
+	--name="${APP}" \
+	--context-dir="compose/${APP}" \
+	--strategy=docker \
+	--labels=app="${APP}"
+
+# ----------------------------
+# Start the build
+# ----------------------------
+echo ">>> Starting build from repo..."
+oc start-build "${APP}" --wait
 
 # ----------------------------
 # Create deployment
 # ----------------------------
-echo ">>> Creating deployment..."
+echo ">>> Applying Deployment with new image..."
 oc create deployment "${APP}" \
-    --image="$IMAGE" \
+    --image="image-registry.openshift-image-registry.svc:5000/${PROJ}/${APP}:latest" \
     --dry-run=client -o yaml | oc apply -f -
 oc label deployment "${APP}" app="${APP}" --overwrite
 
 # ----------------------------
-# Inject runtime variables
+# Inject secrets
 # ----------------------------
-oc set env deployment/"${APP}" \
-	SPRING_PROFILES_ACTIVE=gateway_service,standalone \
-	SPRING_WEB_CORS_ALLOWED_ORIGINS=* \
-	SPRING_WEB_CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,OPTIONS,HEAD \
-	SPRING_WEB_CORS_ALLOWED_HEADERS=* \
-	SPRING_WEB_CORS_ALLOW_CREDENTIALS=true \
-    CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
-    JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
-
-# ----------------------------
-# Set resources and autoscaler
-# ----------------------------
-oc set resources deployment/"${APP}" --limits=cpu=2,memory=2Gi --requests=cpu=500m,memory=1.5Gi
-oc autoscale deployment/"${APP}" --min=1 --max=3 --cpu-percent=80
+oc set env deployment/"${APP}" --from=secret/ogs-postgresql
 
 # ----------------------------
 # Rollout
@@ -99,16 +111,9 @@ echo ">>> Waiting for deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
 # ----------------------------
-# Expose service
+# Cleanup builds
 # ----------------------------
-if ! oc get service "${APP}" &>/dev/null; then
-    echo ">>> Creating service..."
-    oc expose deployment "${APP}" \
-      --name="${APP}" \
-      --port=8080 \
-      --labels=app="${APP}" \
-      --dry-run=client -o yaml | oc apply -f -
-fi
+oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
 # Final status
