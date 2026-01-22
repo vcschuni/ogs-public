@@ -5,7 +5,7 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-geoserver-wms"
-REPO="https://github.com/vcschuni/ogs-public.git"
+IMAGE="docker.io/geoservercloud/geoserver-cloud-wms:2.28.1.3"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -68,35 +68,11 @@ if [[ "${ACTION}" == "remove" ]]; then
 fi
 
 # ----------------------------
-# Import base image
-# ----------------------------
-echo ">>> Import base image..."
-oc import-image geoserver-cloud-wms:2.28.1.3 \
-    --from=docker.io/geoservercloud/geoserver-cloud-wms:2.28.1.3 \
-    --confirm
-
-# ----------------------------
-# Create the build config
-# ----------------------------
-echo ">>> Creating/updating BuildConfig..."
-oc new-build "$REPO" \
-    --name="${APP}" \
-    --context-dir="compose/ogs-geoserver-cloud/wms" \
-    --strategy=docker \
-    --labels=app="${APP}"
-
-# ----------------------------
-# Start the build
-# ----------------------------
-echo ">>> Starting build from repo..."
-oc start-build "${APP}" --wait
-
-# ----------------------------
 # Create deployment
 # ----------------------------
-echo ">>> Applying Deployment with new image..."
+echo ">>> Creating deployment..."
 oc create deployment "${APP}" \
-    --image="image-registry.openshift-image-registry.svc:5000/${PROJ}/${APP}:latest" \
+    --image="${IMAGE}" \
     --dry-run=client -o yaml | oc apply -f -
 oc label deployment "${APP}" app="${APP}" --overwrite
 
@@ -113,7 +89,7 @@ oc set env deployment/"${APP}" \
 	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_PASSWORD}' | base64 --decode) \
 	PGCONFIG_SCHEMA=public \
 	PGCONFIG_INITIALIZE=true \
-	SERVER_SERVLET_CONTEXT_PATH=/geoserver/wms \
+	SPRING_PROFILES_ACTIVE="standalone,pgconfig" \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
 	FLYWAY_BASELINE_ON_MIGRATE=true
@@ -136,7 +112,7 @@ oc rollout status deployment/"${APP}" --timeout=300s
 if ! oc get service "${APP}" &>/dev/null; then
     echo ">>> Creating internal service..."
     oc expose deployment "${APP}" \
-      --name="${APP}" \
+      --name=wms \
       --port=8080 \
       --labels=app="${APP}" \
       --dry-run=client -o yaml | oc apply -f -

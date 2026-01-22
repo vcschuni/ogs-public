@@ -78,8 +78,6 @@ oc label deployment "${APP}" app="${APP}" --overwrite
 # Inject runtime variables
 # ----------------------------
 oc set env deployment/"${APP}" \
-    GEOSERVER_ADMIN_USERNAME=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
-    GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
 	SPRING_PROFILES_ACTIVE=gateway_service,standalone \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
@@ -106,26 +104,6 @@ if ! oc get service "${APP}" &>/dev/null; then
       --port=8080 \
       --labels=app="${APP}" \
       --dry-run=client -o yaml | oc apply -f -
-fi
-
-# ----------------------------
-# Expose external route
-# ----------------------------
-if ! oc get route "${APP}" &>/dev/null; then
-  echo ">>> Creating external route..."
-  oc expose service "${APP}" \
-    --name="${APP}" \
-    --hostname="ogs2-${PROJ}.apps.silver.devops.gov.bc.ca"
-
-  echo ">>> Enabling HTTPS..."
-  oc patch route "${APP}" -p '{
-    "spec": {
-      "tls": {
-        "termination": "edge",
-        "insecureEdgeTerminationPolicy": "Redirect"
-      }
-    }
-  }'
 fi
 
 # ----------------------------
