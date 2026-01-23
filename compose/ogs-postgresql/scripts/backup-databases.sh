@@ -68,7 +68,7 @@ for DB_NAME in "${DATABASES[@]}"; do
     else
         echo "Backup of '${DB_NAME}' successful."
         echo "To restore this backup:"
-        echo " >>> pg_restore -h $DB_HOST -p $DB_PORT -U $DB_USER -d ${DB_NAME} -v ${BACKUP_FILE}"
+        echo " >>> pg_restore -h $DB_HOST -p $DB_PORT -U $DB_USER --clean --if-exists -d ${DB_NAME} -v ${BACKUP_FILE}"
     fi
 done
 
