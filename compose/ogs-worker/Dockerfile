@@ -6,7 +6,9 @@ RUN apt-get update && apt-get install -y \
 	postgresql \
 	postgis \
 	osm2pgsql \
+	osmium-tool \
     curl \
+	screen \
 	bash \
 	rsync \
 	ssh \

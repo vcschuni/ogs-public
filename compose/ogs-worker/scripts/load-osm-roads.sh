@@ -14,6 +14,7 @@ TABLE_NAME="osm_roads"
 BC_OSM_URL="https://download.geofabrik.de/north-america/canada/british-columbia-latest.osm.pbf"
 WORKDIR="/tmp/osm_bc"
 PBF_FILE="${WORKDIR}/british-columbia-latest.osm.pbf"
+ROADS_PBF="${WORKDIR}/bc_roads_only.osm.pbf"
 
 # Download BC OSM data if required
 mkdir -p "$WORKDIR"
@@ -25,6 +26,17 @@ else
     curl -L -o "$PBF_FILE" "$BC_OSM_URL"
 fi
 
+# Create roads-only PBF if required
+if [ -f "$ROADS_PBF" ]; then
+    echo "Filtered roads PBF already exists at $ROADS_PBF, skipping osmium filter."
+else
+    echo "Filtering roads using osmium..."
+    osmium tags-filter \
+      "$PBF_FILE" \
+      w/highway \
+      -o "$ROADS_PBF"
+fi
+
 # Export PostgreSQL password
 export PGPASSWORD="$POSTGRESQL_SUPERUSER_PASSWORD"
 
@@ -33,7 +45,7 @@ echo "Truncating existing table if it exists..."
 psql -h "$POSTGRESQL_HOST" -U "$POSTGRESQL_SUPERUSER_USER" -d "$POSTGRESQL_DATA_DB" -c "
 DO \$\$
 BEGIN
-   IF EXISTS (SELECT FROM information_schema.tables 
+   IF EXISTS (SELECT FROM information_schema.tables
               WHERE table_schema = 'public' AND table_name = '$TABLE_NAME') THEN
        TRUNCATE TABLE $TABLE_NAME;
    END IF;
@@ -41,8 +53,8 @@ END
 \$\$;
 "
 
-# Import the OSM data into default tables
-echo "Importing roads using osm2pgsql..."
+# Import the filtered OSM roads
+echo "Importing filtered roads using osm2pgsql..."
 osm2pgsql \
   --database "$POSTGRESQL_DATA_DB" \
   --username "$POSTGRESQL_SUPERUSER_USER" \
@@ -50,9 +62,10 @@ osm2pgsql \
   --port "$POSTGRESQL_PORT" \
   --hstore \
   --slim \
+  --drop \
   --create \
   --multi-geometry \
-  "$PBF_FILE"
+  "$ROADS_PBF"
 
 # Populate single table from planet_osm_line
 echo "Populating single table '$TABLE_NAME' from planet_osm_line..."

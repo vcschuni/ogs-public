@@ -6,7 +6,7 @@ set -euo pipefail
 # ----------------------------
 APP="ogs-postgresql"
 REPO="https://github.com/vcschuni/ogs-public.git"
-PVC_SIZE="1Gi"
+PVC_SIZE="10Gi"
 
 # ----------------------------
 # Verify passed arg and show help if required

@@ -4,8 +4,9 @@
 --
 -----------------------------------------------------------------------------
 
--- Enable PostGIS extension if not already enabled
+-- Enable PostGIS extensions
 CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS hstore;
 
 -- Create Points of Interest (POI) table
 CREATE TABLE poi (
