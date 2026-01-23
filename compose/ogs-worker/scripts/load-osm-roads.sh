@@ -40,6 +40,17 @@ fi
 # Export PostgreSQL password
 export PGPASSWORD="$POSTGRESQL_SUPERUSER_PASSWORD"
 
+# Remove old temp tables if they exist
+psql -h "$POSTGRESQL_HOST" -U "$POSTGRESQL_SUPERUSER_USER" -d "$POSTGRESQL_DATA_DB" -c "
+DROP TABLE IF EXISTS planet_osm_line;
+DROP TABLE IF EXISTS planet_osm_nodes;
+DROP TABLE IF EXISTS planet_osm_point;
+DROP TABLE IF EXISTS planet_osm_polygon;
+DROP TABLE IF EXISTS planet_osm_rels;
+DROP TABLE IF EXISTS planet_osm_roads;
+DROP TABLE IF EXISTS planet_osm_ways;
+"
+
 # Truncate the existing database table if it exists
 echo "Truncating existing table if it exists..."
 psql -h "$POSTGRESQL_HOST" -U "$POSTGRESQL_SUPERUSER_USER" -d "$POSTGRESQL_DATA_DB" -c "
@@ -91,6 +102,17 @@ WHERE highway IS NOT NULL;
 echo "Indexing geometry..."
 psql -h "$POSTGRESQL_HOST" -U "$POSTGRESQL_SUPERUSER_USER" -d "$POSTGRESQL_DATA_DB" -c "
 CREATE INDEX IF NOT EXISTS ${TABLE_NAME}_geom_idx ON $TABLE_NAME USING GIST(way);
+"
+
+# Remove old temp tables if they exist
+psql -h "$POSTGRESQL_HOST" -U "$POSTGRESQL_SUPERUSER_USER" -d "$POSTGRESQL_DATA_DB" -c "
+DROP TABLE IF EXISTS planet_osm_line;
+DROP TABLE IF EXISTS planet_osm_nodes;
+DROP TABLE IF EXISTS planet_osm_point;
+DROP TABLE IF EXISTS planet_osm_polygon;
+DROP TABLE IF EXISTS planet_osm_rels;
+DROP TABLE IF EXISTS planet_osm_roads;
+DROP TABLE IF EXISTS planet_osm_ways;
 "
 
 # Report success
