@@ -141,15 +141,15 @@ if ! oc get route "${APP}" &>/dev/null; then
     --name="${APP}" \
     --hostname="${SERVICE_HOSTNAME}"
 
-  echo ">>> Enabling HTTPS..."
-  oc patch route "${APP}" -p '{
-    "spec": {
-      "tls": {
-        "termination": "edge",
-        "insecureEdgeTerminationPolicy": "Redirect"
-      }
-    }
-  }'
+  # echo ">>> Enabling HTTPS..."
+  # oc patch route "${APP}" -p '{
+    # "spec": {
+      # "tls": {
+        # "termination": "edge",
+        # "insecureEdgeTerminationPolicy": "Redirect"
+      # }
+    # }
+  # }'
 fi
 
 # ----------------------------
