@@ -90,7 +90,7 @@ oc set env deployment/"${APP}" \
 # Set resources and autoscaler
 # ----------------------------
 oc set resources deployment/"${APP}" --limits=cpu=2,memory=2Gi --requests=cpu=500m,memory=1.5Gi
-oc autoscale deployment/"${APP}" --min=1 --max=3 --cpu-percent=80
+oc autoscale deployment/"${APP}" --min=1 --max=2 --cpu-percent=80
 
 # ----------------------------
 # Rollout

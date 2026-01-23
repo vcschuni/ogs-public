@@ -55,7 +55,6 @@ oc delete bc -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
-oc delete hpa "${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
 # Stop here if remove was requested
@@ -98,8 +97,7 @@ oc set env deployment/"${APP}" \
 # ----------------------------
 # Set resources and autoscaler
 # ----------------------------
-oc set resources deployment/"${APP}" --limits=cpu=2,memory=2Gi --requests=cpu=500m,memory=1.5Gi
-oc autoscale deployment/"${APP}" --min=1 --max=1 --cpu-percent=80
+#oc set resources deployment/"${APP}" --limits=cpu=2,memory=2Gi --requests=cpu=500m,memory=1.5Gi
 
 # ----------------------------
 # Rollout
