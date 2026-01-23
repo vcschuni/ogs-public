@@ -145,7 +145,7 @@ if ! oc get route "${APP}" &>/dev/null; then
   oc patch route "${APP}" -p '{
     "spec": {
       "tls": {
-        "termination": "edge",
+        "termination": "reencrypt",
         "insecureEdgeTerminationPolicy": "Redirect"
       }
     }
