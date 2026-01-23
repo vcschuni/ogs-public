@@ -9,7 +9,7 @@ TARGET_IMAGE="ogs-postgresql:latest"
 TARGET_SCRIPT="/scripts/backup-databases.sh"
 SCHEDULE="0 6,18 * * *"
 PVC_NAME="ogs-postgresql-backup"
-PVC_SIZE="5Gi"
+PVC_SIZE="10Gi"
 
 # ----------------------------
 # Verify passed arg and show help if required
