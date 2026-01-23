@@ -17,8 +17,9 @@ RUN python3.9 -m venv /opt/pgadmin/venv \
     && /opt/pgadmin/venv/bin/pip install --upgrade pip \
     && /opt/pgadmin/venv/bin/pip install pgadmin4 gunicorn
 
-# Override pgAdmin logging to /tmp
+# pgAdmin overrides
 RUN echo "LOG_FILE = '/tmp/pgadmin.log'" > /opt/pgadmin/venv/lib/python3.9/site-packages/pgadmin4/config_local.py
+RUN echo "ENABLE_PROXY_FIX = True" >> /opt/pgadmin/venv/lib/python3.9/site-packages/pgadmin4/config_local.py
 
 # Set environment variables
 ENV PATH="/opt/pgadmin/venv/bin:$PATH"
