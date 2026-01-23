@@ -31,4 +31,5 @@ ENV PGADMIN_SERVER_MODE=True
 EXPOSE 8080
 
 # Start pgAdmin with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
+#CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--forwarded-allow-ips", "*", "pgadmin4.pgAdmin4:app"]
