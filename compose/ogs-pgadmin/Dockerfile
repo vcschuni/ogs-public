@@ -19,7 +19,6 @@ RUN python3.9 -m venv /opt/pgadmin/venv \
 
 # pgAdmin overrides
 RUN echo "LOG_FILE = '/tmp/pgadmin.log'" > /opt/pgadmin/venv/lib/python3.9/site-packages/pgadmin4/config_local.py
-RUN echo "ENABLE_PROXY_FIX = True" >> /opt/pgadmin/venv/lib/python3.9/site-packages/pgadmin4/config_local.py
 
 # Set environment variables
 ENV PATH="/opt/pgadmin/venv/bin:$PATH"
@@ -31,5 +30,4 @@ ENV PGADMIN_SERVER_MODE=True
 EXPOSE 8080
 
 # Start pgAdmin with Gunicorn
-#CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--forwarded-allow-ips", "*", "pgadmin4.pgAdmin4:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
