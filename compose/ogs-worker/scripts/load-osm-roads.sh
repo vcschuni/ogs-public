@@ -67,6 +67,17 @@ osm2pgsql \
   --multi-geometry \
   "$ROADS_PBF"
 
+# Create table if it does not exist
+echo "Ensuring target table '$TABLE_NAME' exists..."
+psql -h "$POSTGRESQL_HOST" -U "$POSTGRESQL_SUPERUSER_USER" -d "$POSTGRESQL_DATA_DB" -c "
+CREATE TABLE IF NOT EXISTS $TABLE_NAME (
+    osm_id BIGINT,
+    name TEXT,
+    highway TEXT,
+    way geometry(LineString, 3857)
+);
+"
+
 # Populate single table from planet_osm_line
 echo "Populating single table '$TABLE_NAME' from planet_osm_line..."
 psql -h "$POSTGRESQL_HOST" -U "$POSTGRESQL_SUPERUSER_USER" -d "$POSTGRESQL_DATA_DB" -c "
