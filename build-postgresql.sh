@@ -85,7 +85,7 @@ spec:
   resources:
     requests:
       storage: ${PVC_SIZE}
-  storageClassName: netapp-block-standard
+  storageClassName: netapp-block-extended
 EOF
 	echo ">>> Waiting for PVC to be ready..."
 	COUNT=0

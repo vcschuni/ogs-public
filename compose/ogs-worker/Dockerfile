@@ -15,9 +15,6 @@ RUN apt-get update && apt-get install -y \
 	nano \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create scripts directory
-RUN mkdir -p /scripts
-
 # Copy scripts and set permissions
 COPY scripts/* /scripts/
 RUN chmod -R 777 /scripts

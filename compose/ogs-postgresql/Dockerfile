@@ -18,6 +18,6 @@ COPY initdb.d/*.sql /docker-entrypoint-initdb.d/
 # Copy startup shell scripts
 COPY initdb.d/init.sh /docker-entrypoint-initdb.d/
 
-# Copy backup script
-COPY backup-databases.sh /opt/scripts/
-RUN chmod +x /opt/scripts/*.sh
+# Copy scripts and set permissions
+COPY scripts/* /scripts/
+RUN chmod +x /scripts/*.*

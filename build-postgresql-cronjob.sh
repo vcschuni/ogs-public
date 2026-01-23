@@ -6,7 +6,7 @@ set -euo pipefail
 # ----------------------------
 APP="ogs-postgresql-cronjob"
 TARGET_IMAGE="ogs-postgresql:latest"
-TARGET_SCRIPT="/opt/scripts/backup-databases.sh"
+TARGET_SCRIPT="/scripts/backup-databases.sh"
 SCHEDULE="0 6,18 * * *"
 PVC_NAME="ogs-postgresql-backup"
 PVC_SIZE="5Gi"
@@ -84,6 +84,7 @@ spec:
   resources:
     requests:
       storage: ${PVC_SIZE}
+  storageClassName: netapp-file-backup
 EOF
 	echo ">>> Waiting for PVC to be ready..."
 	COUNT=0
