@@ -24,4 +24,4 @@ RUN chmod -R 777 /scripts
 WORKDIR /scripts
 
 # Keep container running for interactive use
-CMD ["/bin/bash"]
+CMD ["tail", "-f", "/dev/null"]
