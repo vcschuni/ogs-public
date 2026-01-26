@@ -12,11 +12,8 @@ RUN apt-get update && apt-get install -y \
 # Set timezone to Pacific (BC)
 ENV TZ=America/Vancouver
 
-# Copy startup SQL scripts
-COPY initdb.d/*.sql /docker-entrypoint-initdb.d/
-
-# Copy startup shell scripts
-COPY initdb.d/init.sh /docker-entrypoint-initdb.d/
+# Copy initialization scripts
+COPY initdb.d/*.* /docker-entrypoint-initdb.d/
 
 # Copy scripts and set permissions
 COPY scripts/* /scripts/
