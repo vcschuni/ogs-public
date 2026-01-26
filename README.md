@@ -9,7 +9,7 @@ This repository contains the required components to build a **Public Facing Spat
 - **PostgreSQL / PostGIS**: a powerful object-relational database system enabled with geospatial functionality
 - **PGAdmin Web**: an administration and management tool for PostgreSQL databases
 
-## Build/Deployment in **DEV**
+## Build/Deployment
 #### Requirements:
 - Shell environment via native linux or WSL
 - Git Version Control (https://git-scm.com/install/)
@@ -24,23 +24,23 @@ cd ogs-public
 #### 2. Login to OpenShift DEV Project:
 ```bash
 oc login --token=<token> --server=https://api.silver.devops.gov.bc.ca:6443
-oc project <your dev project name>
+oc project <your project id>
 ```
 
 #### 3. Add OpenShift secrets:
 ```bash
 oc create secret generic ogs-postgresql \
   --from-literal=POSTGRESQL_HOST=ogs-postgresql \
-  --from-literal=POSTGRESQL_DATA_DB=mydata \
-  --from-literal=POSTGRESQL_AUTH_DB=myauthorizationdb \
   --from-literal=POSTGRESQL_SUPERUSER_USER=postgres \
   --from-literal=POSTGRESQL_SUPERUSER_PASSWORD=***password*** \
-  --from-literal=POSTGRESQL_RO_USER=ro_user \
-  --from-literal=POSTGRESQL_RO_PASSWORD=***password*** \
-  --from-literal=POSTGRESQL_RW_USER=rw_user \
-  --from-literal=POSTGRESQL_RW_PASSWORD=***password*** \
-  --from-literal=POSTGRESQL_AUTH_USER=auth_user \
-  --from-literal=POSTGRESQL_AUTH_PASSWORD=***password***
+  --from-literal=POSTGRESQL_DATA_DB=my_gis_data \
+  --from-literal=POSTGRESQL_DATA_RO_USER=my_ro_user \
+  --from-literal=POSTGRESQL_DATA_RO_PASSWORD=***password*** \
+  --from-literal=POSTGRESQL_DATA_RW_USER=my_rw_user \
+  --from-literal=POSTGRESQL_DATA_RW_PASSWORD=***password*** \
+  --from-literal=POSTGRESQL_CONFIG_DB=my_configuration_db \
+  --from-literal=POSTGRESQL_CONFIG_USER=my_config_user \
+  --from-literal=POSTGRESQL_CONFIG_PASSWORD=***password***
 
 oc create secret generic ogs-pgadmin \
   --from-literal=PGADMIN_EMAIL=admin@example.com \
@@ -51,20 +51,30 @@ oc create secret generic ogs-geoserver \
   --from-literal=GEOSERVER_ADMIN_PASSWORD=***password***
 ```
 
-#### 4. Build and Deploy Components:
+#### 4. Build and Deploy Components (in order):
 ```bash
 ./build-postgresql.sh deploy
-	- Read and confirm with 'Y'
+	- Review and confirm with 'Y'
 	
 ./build-pgadmin.sh deploy
-	- Read and confirm with 'Y'
+	- Review and confirm with 'Y'
 	
-./build-geoserver.sh deploy
-	- Read and confirm with 'Y'
+./build-geoserver-webgui.sh deploy
+	- Review and confirm with 'Y'
+	
+./build-geoserver-wfs.sh deploy
+	- Review and confirm with 'Y'
+	
+./build-geoserver-wms.sh deploy
+	- Review and confirm with 'Y'
+	
+./build-geoserver-gateway.sh deploy
+	- Review and confirm with 'Y'
 	
 ./build-rproxy.sh deploy
-	- Read and confirm with 'Y'
+	- Review and confirm with 'Y'
+	
+./build-postgresql-cronjob.sh deploy
+	- Review and confirm with 'Y'
 ```
 
-
-## Promotion from DEV to TEST/PROD
