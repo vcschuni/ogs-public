@@ -5,7 +5,7 @@ This repository contains the required components to build a **Public Facing Spat
 ## Architecture
 
 - **Nginx**: a rate limiting and caching reverse proxy exposed externally for GeoServer and PGAdmin Web
-- **GeoServer**: high performance server for transforming and sharing geospatial data
+- **GeoServer Cloud**: high performance server for transforming and sharing geospatial data
 - **PostgreSQL / PostGIS**: a powerful object-relational database system enabled with geospatial functionality
 - **PGAdmin Web**: an administration and management tool for PostgreSQL databases
 
