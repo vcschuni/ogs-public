@@ -59,7 +59,7 @@ oc create secret generic ogs-geoserver \
 ./build-pgadmin.sh deploy
 	- Review and confirm with 'Y'
 	
-./build-geoserver-webgui.sh deploy
+./build-geoserver-webui.sh deploy
 	- Review and confirm with 'Y'
 	
 ./build-geoserver-wfs.sh deploy
@@ -77,4 +77,9 @@ oc create secret generic ogs-geoserver \
 ./build-postgresql-cronjob.sh deploy
 	- Review and confirm with 'Y'
 ```
+
+#### 5. End points
+- GeoServer WebUi: <a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/</a>
+- PgAdmin Web:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/pgadmin/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/pgadmin/</a>
+
 
