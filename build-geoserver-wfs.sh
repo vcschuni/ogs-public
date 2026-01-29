@@ -82,8 +82,7 @@ oc label deployment "${APP}" app="${APP}" --overwrite
 oc set env deployment/"${APP}" \
     GEOSERVER_ADMIN_USERNAME=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
     GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
-	LOGGING_LEVEL_ROOT=DEBUG \
-	LOGGING_LEVEL_ORG_GEOSERVER=TRACE \
+	LOGGING_LEVEL_ORG_GEOSERVER=INFO \
 	PGCONFIG_HOST=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_HOST}' | base64 --decode) \
 	PGCONFIG_PORT=5432 \
 	PGCONFIG_DATABASE=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_DB}' | base64 --decode) \
