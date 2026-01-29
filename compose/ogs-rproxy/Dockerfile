@@ -1,5 +1,5 @@
 #FROM registry.access.redhat.com/ubi9/nginx-124
-FROM nginx:latest
+FROM nginx-122
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
