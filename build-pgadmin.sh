@@ -159,6 +159,11 @@ oc set volume deployment/"${APP}" \
     --mount-path=/var/lib/pgadmin
 
 # ----------------------------
+# Set resources
+# ----------------------------
+oc set resources deployment/"${APP}" --limits=cpu=750m,memory=1Gi --requests=cpu=200m,memory=512Mi 
+
+# ----------------------------
 # Rollout and expose internally
 # ----------------------------
 echo ">>> Waiting for deployment rollout..."
