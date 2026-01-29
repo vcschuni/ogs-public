@@ -78,10 +78,10 @@ fi
 # Import base image
 # Needs to match Dockerfile
 # ----------------------------
-# echo ">>> Import base image..."
-# oc import-image nginx-124 \
-	# --from=registry.access.redhat.com/ubi9/nginx-124 \
-	# --confirm
+echo ">>> Import base image..."
+oc import-image nginx:1.29 \
+	--from=docker.io/nginx:1.29 \
+	--confirm
 
 # ----------------------------
 # Create BuildConfig
