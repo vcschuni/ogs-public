@@ -161,7 +161,7 @@ oc set volume deployment/"${APP}" \
 # ----------------------------
 # Set resources
 # ----------------------------
-oc set resources deployment/"${APP}" --limits=cpu=750m,memory=1Gi --requests=cpu=200m,memory=512Mi 
+#oc set resources deployment/"${APP}" --limits=cpu=750m,memory=1Gi --requests=cpu=200m,memory=512Mi 
 
 # ----------------------------
 # Rollout and expose internally
