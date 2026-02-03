@@ -91,6 +91,11 @@ oc set env deployment/"${APP}" \
 	PGCONFIG_SCHEMA=public \
 	PGCONFIG_INITIALIZE=true \
 	SPRING_PROFILES_ACTIVE="standalone,pgconfig" \
+	SPRING_CLOUD_BUS_ENABLED=true \
+	SPRING_RABBITMQ_HOST=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_HOST}' | base64 --decode) \
+	SPRING_RABBITMQ_PORT=5672 \
+	SPRING_RABBITMQ_USERNAME=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_USER}' | base64 --decode) \
+	SPRING_RABBITMQ_PASSWORD=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_PASS}' | base64 --decode) \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
 	FLYWAY_BASELINE_ON_MIGRATE=true
