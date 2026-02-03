@@ -49,6 +49,11 @@ oc create secret generic ogs-pgadmin \
 oc create secret generic ogs-geoserver \
   --from-literal=GEOSERVER_ADMIN_USER=admin \
   --from-literal=GEOSERVER_ADMIN_PASSWORD=***password***
+  
+oc create secret generic ogs-rabbitmq \
+  --from-literal=RABBITMQ_HOST=ogs-rabbitmq \
+  --from-literal=RABBITMQ_DEFAULT_USER=admin \
+  --from-literal=RABBITMQ_DEFAULT_PASS=***password***
 ```
 
 #### 4. Build and Deploy Components (in order):
@@ -84,5 +89,6 @@ oc create secret generic ogs-geoserver \
 #### 5. End points
 - GeoServer WebUi: <a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/</a>
 - PgAdmin Web:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/pgadmin/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/pgadmin/</a>
+- RabbitMQ Management:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/rabbitmq/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/rabbitmq/</a>
 
 
