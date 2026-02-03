@@ -80,8 +80,8 @@ oc label deployment "${APP}" app="${APP}" --overwrite
 # Inject runtime environment variables
 # ----------------------------
 oc set env deployment/"${APP}" \
-  RABBITMQ_DEFAULT_USER=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.DEFAULT_USER}' | base64 --decode) \
-  RABBITMQ_DEFAULT_PASS=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.DEFAULT_PASS}' | base64 --decode)
+  RABBITMQ_DEFAULT_USER=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_USER}' | base64 --decode) \
+  RABBITMQ_DEFAULT_PASS=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_PASS}' | base64 --decode)
 
 # ----------------------------
 # Set resources (optional)
@@ -118,5 +118,5 @@ fi
 # ----------------------------
 echo
 echo ">>> COMPLETE — ${APP} deployed!"
-echo ">>> AMQP available internally at ${APP}:5672"
-echo ">>> Management UI available internally at ${APP}-management:15672"
+echo ">>> To rollback: oc rollout undo deployment/${APP}"
+echo
