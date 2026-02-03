@@ -68,6 +68,9 @@ oc create secret generic ogs-geoserver \
 ./build-geoserver-wms.sh deploy
 	- Review and confirm with 'Y'
 	
+./build-geoserver-rest.sh deploy
+	- Review and confirm with 'Y'
+	
 ./build-geoserver-gateway.sh deploy
 	- Review and confirm with 'Y'
 	
