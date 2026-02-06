@@ -51,10 +51,7 @@ esac
 # ----------------------------
 echo ">>> Removing old ${APP} resources..."
 [[ "${ACTION}" == "remove" ]] && oc delete service -l app="${APP}" --ignore-not-found --wait=true
-oc delete bc -l app="${APP}" --ignore-not-found --wait=true
-oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
-oc delete is -l app="${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
 # Stop here if remove was requested
@@ -96,13 +93,13 @@ oc set env deployment/"${APP}" \
 	SPRING_RABBITMQ_USERNAME=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_USER}' | base64 --decode) \
 	SPRING_RABBITMQ_PASSWORD=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_PASS}' | base64 --decode) \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
-    JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
+    JAVA_OPTS="-Xms384m -Xmx768m -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
 	FLYWAY_BASELINE_ON_MIGRATE=true
 
 # ----------------------------
 # Set resources
 # ----------------------------
-oc set resources deployment/"${APP}" --limits=cpu=2,memory=2Gi --requests=cpu=500m,memory=1.5Gi
+oc set resources deployment/"${APP}" --limits=cpu=1,memory=1.25Gi --requests=cpu=200m,memory=1Gi
 
 # ----------------------------
 # Rollout

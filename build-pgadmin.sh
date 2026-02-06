@@ -140,6 +140,12 @@ oc create deployment "${APP}" \
     --dry-run=client -o yaml | oc apply -f -
 oc label deployment "${APP}" app="${APP}" --overwrite
 
+# Switch deployment style to Recreate to prevent PVC access conflicts
+oc patch deployment "${APP}" --type=json -p='[
+  {"op":"remove","path":"/spec/strategy/rollingUpdate"},
+  {"op":"replace","path":"/spec/strategy/type","value":"Recreate"}
+]'
+
 # ----------------------------
 # Inject runtime variables
 # ----------------------------
@@ -161,7 +167,7 @@ oc set volume deployment/"${APP}" \
 # ----------------------------
 # Set resources
 # ----------------------------
-#oc set resources deployment/"${APP}" --limits=cpu=750m,memory=1Gi --requests=cpu=200m,memory=512Mi 
+oc set resources deployment/"${APP}" --limits=cpu=750m,memory=1Gi --requests=cpu=250m,memory=512Mi
 
 # ----------------------------
 # Rollout and expose internally

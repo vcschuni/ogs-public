@@ -52,7 +52,6 @@ esac
 echo ">>> Removing old ${APP} resources..."
 [[ "${ACTION}" == "remove" ]] && oc delete service -l app="${APP}" --ignore-not-found --wait=true
 oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
-oc delete is -l app="${APP}" --ignore-not-found --wait=true
 oc delete hpa "${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
@@ -84,13 +83,13 @@ oc set env deployment/"${APP}" \
 	SPRING_WEB_CORS_ALLOWED_HEADERS=* \
 	SPRING_WEB_CORS_ALLOW_CREDENTIALS=true \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
-    JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+    JAVA_OPTS="-Xms384m -Xmx768m -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 
 # ----------------------------
 # Set resources and autoscaler
 # ----------------------------
-oc set resources deployment/"${APP}" --limits=cpu=2,memory=2Gi --requests=cpu=500m,memory=1.5Gi
-oc autoscale deployment/"${APP}" --min=1 --max=2 --cpu-percent=80
+oc set resources deployment/"${APP}" --limits=cpu=500m,memory=1Gi --requests=cpu=200m,memory=512Mi
+oc autoscale deployment/"${APP}" --min=1 --max=2 --cpu-percent=70
 
 # ----------------------------
 # Rollout

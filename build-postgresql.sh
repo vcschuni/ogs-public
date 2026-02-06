@@ -56,6 +56,7 @@ oc delete bc -l app="${APP}" --ignore-not-found --wait=true
 oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
 oc delete is -l app="${APP}" --ignore-not-found --wait=true
+oc delete hpa "${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
 # Stop here if remove was requested
@@ -141,6 +142,12 @@ oc create deployment "${APP}" \
     --dry-run=client -o yaml | oc apply -f -
 oc label deployment "${APP}" app="${APP}" --overwrite
 
+# Switch deployment style to Recreate to prevent PVC access conflicts
+oc patch deployment "${APP}" --type=json -p='[
+  {"op":"remove","path":"/spec/strategy/rollingUpdate"},
+  {"op":"replace","path":"/spec/strategy/type","value":"Recreate"}
+]'
+
 # ----------------------------
 # Inject runtime variables
 # ----------------------------
@@ -164,7 +171,13 @@ oc set volume deployment/"${APP}" \
     --type=pvc \
     --claim-name="${APP}-data" \
     --mount-path=/var/lib/postgresql
-	
+
+# ----------------------------
+# Set resources (optional)
+# ----------------------------
+oc set resources deployment/"${APP}" --limits=cpu=1,memory=2Gi --requests=cpu=500m,memory=1Gi
+oc autoscale deployment/"${APP}" --min=1 --max=1 --cpu-percent=100
+
 # ----------------------------
 # Rollout and expose internally
 # ----------------------------

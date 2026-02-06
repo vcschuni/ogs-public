@@ -116,6 +116,15 @@ oc create cronjob "${APP}" \
   -- /bin/sh -c "${TARGET_SCRIPT} 2>&1 | tee -a /backup/backup.log"
 
 # ----------------------------
+# Set cronjob timezone to PST
+# ----------------------------
+oc patch cronjob "${APP}" --type=merge -p '{
+  "spec": {
+    "timeZone": "America/Vancouver"
+  }
+}'
+
+# ----------------------------
 # Set cronjob limits
 # ----------------------------
 oc patch cronjob "${APP}" --type=merge -p '{"spec":{"successfulJobsHistoryLimit":1,"failedJobsHistoryLimit":1}}'

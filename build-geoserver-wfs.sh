@@ -51,10 +51,7 @@ esac
 # ----------------------------
 echo ">>> Removing old ${APP} resources..."
 [[ "${ACTION}" == "remove" ]] && oc delete service -l app="${APP}" --ignore-not-found --wait=true
-oc delete bc -l app="${APP}" --ignore-not-found --wait=true
-oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
-oc delete is -l app="${APP}" --ignore-not-found --wait=true
 oc delete hpa "${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
@@ -97,14 +94,14 @@ oc set env deployment/"${APP}" \
 	SPRING_RABBITMQ_USERNAME=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_USER}' | base64 --decode) \
 	SPRING_RABBITMQ_PASSWORD=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_PASS}' | base64 --decode) \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
-    JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
+    JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MaxGCPauseMillis=200 -XX:MaxMetaspaceSize=256m" \
 	FLYWAY_BASELINE_ON_MIGRATE=true
 
 # ----------------------------
 # Set resources and autoscaler
 # ----------------------------
 oc set resources deployment/"${APP}" --limits=cpu=2,memory=2Gi --requests=cpu=500m,memory=1.5Gi
-oc autoscale deployment/"${APP}" --min=1 --max=2 --cpu-percent=80
+oc autoscale deployment/"${APP}" --min=1 --max=2 --cpu-percent=70
 
 # ----------------------------
 # Rollout

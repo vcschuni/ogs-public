@@ -5,7 +5,8 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-rabbitmq"
-IMAGE="docker.io/rabbitmq:3.11-management"  # includes management UI
+IMAGE="docker.io/rabbitmq:3.11-management"
+PVC_SIZE="2Gi"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -52,10 +53,51 @@ esac
 echo ">>> Removing old ${APP} resources..."
 [[ "${ACTION}" == "remove" ]] && oc delete service -l app="${APP}" --ignore-not-found --wait=true
 oc delete deployment -l app="${APP}" --ignore-not-found --wait=true
-oc delete secret -l app="${APP}" --ignore-not-found --wait=true
+oc delete hpa "${APP}" --ignore-not-found --wait=true
 
+# ----------------------------
 # Stop here if remove was requested
+# ----------------------------
 [[ "${ACTION}" == "remove" ]] && { echo ">>> Remove completed successfully"; exit 0; }
+
+# ----------------------------
+# Create PVC if it doesn't exist
+# ----------------------------
+if ! oc get pvc "${APP}-data" &>/dev/null; then
+    echo ">>> Creating PVC for data..."
+    oc apply -f - <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${APP}-data
+  labels: 
+    app: ${APP} 
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: ${PVC_SIZE}
+EOF
+	echo ">>> Waiting for PVC to be ready..."
+	COUNT=0
+	while true; do
+		STATUS=$(oc get pvc "${APP}-data" -o jsonpath='{.status.phase}')
+		echo "Current status: $STATUS"
+		if [[ "$STATUS" == "Bound" ]]; then
+			echo ">>> PVC is ready!"
+			break
+		fi
+		sleep 5
+		COUNT=$((COUNT+1))
+		if [[ $COUNT -ge 30 ]]; then
+			echo ">>> Timeout waiting for PVC!"
+			exit 1
+		fi
+	done
+else
+    echo ">>> PVC ${APP}-data already exists, skipping creation"
+fi
 
 # ----------------------------
 # Create credentials secret
@@ -76,6 +118,12 @@ oc create deployment "${APP}" \
   --dry-run=client -o yaml | oc apply -f -
 oc label deployment "${APP}" app="${APP}" --overwrite
 
+# Switch deployment style to Recreate to prevent PVC access conflicts
+oc patch deployment "${APP}" --type=json -p='[
+  {"op":"remove","path":"/spec/strategy/rollingUpdate"},
+  {"op":"replace","path":"/spec/strategy/type","value":"Recreate"}
+]'
+
 # ----------------------------
 # Inject runtime environment variables
 # ----------------------------
@@ -84,9 +132,21 @@ oc set env deployment/"${APP}" \
   RABBITMQ_DEFAULT_PASS=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_PASS}' | base64 --decode)
 
 # ----------------------------
+# Attach PVC
+# ----------------------------
+echo ">>> Attaching PVC..."
+oc set volume deployment/"${APP}" \
+    --add \
+	--name="${APP}-data" \
+    --type=pvc \
+    --claim-name="${APP}-data" \
+    --mount-path=/var/lib/rabbitmq
+
+# ----------------------------
 # Set resources (optional)
 # ----------------------------
 oc set resources deployment/"${APP}" --limits=cpu=1,memory=1Gi --requests=cpu=500m,memory=512Mi
+oc autoscale deployment/"${APP}" --min=1 --max=1 --cpu-percent=100
 
 # ----------------------------
 # Rollout
