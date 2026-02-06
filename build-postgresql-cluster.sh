@@ -90,10 +90,12 @@ oc start-build "${APP}" --wait
 IMAGE="image-registry.openshift-image-registry.svc:5000/${PROJ}/${APP}:latest"
 
 # ----------------------------
-# Get secrets
+# Extract secrets
 # ----------------------------
-POSTGRES_USER=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRES_USER}' | base64 --decode)
-POSTGRES_DB=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRES_DB}' | base64 --decode)
+# Extract secrets
+POSTGRES_USER=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_SUPERUSER_USER}' | base64 --decode)
+POSTGRES_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_SUPERUSER_PASSWORD}' | base64 --decode)
+POSTGRES_DB=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_DATA_DB}' | base64 --decode)
 
 # ----------------------------
 # Deploy Crunchy HA PostgresCluster
@@ -122,13 +124,13 @@ spec:
             storage: ${PVC_SIZE}
 
   users:
-    - name: "$POSTGRES_USER"
+    - name: "${POSTGRES_USER}"
+      passwordSecret:
+        name: ogs-postgresql
+        key: POSTGRESQL_SUPERUSER_PASSWORD
       databases:
-        - "$POSTGRES_DB"
+        - "${POSTGRES_DB}"
       options: "SUPERUSER"
-
-  secrets:
-    - name: ogs-postgresql
 EOF
 
 # ----------------------------
@@ -137,6 +139,11 @@ EOF
 echo ">>> Waiting for cluster to be ready..."
 sleep 5
 oc wait --for=condition=Ready postgrescluster/${APP} --timeout=600s || true
+
+# ----------------------------
+# Cleanup builds
+# ----------------------------
+oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 
 # ----------------------------
 # Final status

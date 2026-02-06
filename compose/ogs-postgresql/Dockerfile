@@ -1,22 +1,11 @@
-FROM docker.io/postgres:17
+FROM registry.crunchydata.com/crunchydata/crunchy-postgres-ha:17.5-1
 
-# Install Python and dependencies
-RUN apt-get update && apt-get install -y \
-	postgis \
-	postgresql-17-postgis-3 \
-	bash \
-	rsync \
-	ssh \
-	nano \
-	cron \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Set timezone to Pacific (BC)
+# Set timezone
 ENV TZ=America/Vancouver
 
 # Copy initialization scripts
-COPY initdb.d/*.* /docker-entrypoint-initdb.d/
+COPY initdb.d/*.* /opt/cpm/initdb-scripts/  # Crunchy HA default location
 
-# Copy scripts and set permissions
+# Copy any other scripts
 COPY scripts/* /scripts/
 RUN chmod +x /scripts/*.*
