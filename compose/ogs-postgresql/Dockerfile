@@ -1,4 +1,4 @@
-FROM docker.io/postgis/postgis:17-3.3
+FROM docker.io/postgis/postgis:17-3.6
 
 # Install Python and dependencies
 RUN apt-get update && apt-get install -y \

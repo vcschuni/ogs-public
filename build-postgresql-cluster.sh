@@ -65,6 +65,15 @@ if [[ "${ACTION}" == "remove" ]]; then
 fi
 
 # ----------------------------
+# Import base image
+# Needs to match Dockerfile
+# ----------------------------
+echo ">>> Import base image..."
+oc import-image postgis:17-3.6 \
+	--from=docker.io/postgis/postgis:17-3.6 \
+	--confirm
+
+# ----------------------------
 # Build image
 # ----------------------------
 echo ">>> Creating/updating build..."
