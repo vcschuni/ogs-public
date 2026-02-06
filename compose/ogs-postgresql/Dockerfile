@@ -1,7 +1,9 @@
-FROM docker.io/postgis/postgis:17-3.6
+FROM docker.io/postgres:17
 
 # Install Python and dependencies
 RUN apt-get update && apt-get install -y \
+	postgis \
+	postgresql-17-postgis-3 \
 	bash \
 	rsync \
 	ssh \

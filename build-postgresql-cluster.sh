@@ -69,8 +69,8 @@ fi
 # Needs to match Dockerfile
 # ----------------------------
 echo ">>> Import base image..."
-oc import-image postgis:17-3.6 \
-	--from=docker.io/postgis/postgis:17-3.6 \
+oc import-image postgres:17 \
+	--from=docker.io/postgres:17 \
 	--confirm
 
 # ----------------------------
