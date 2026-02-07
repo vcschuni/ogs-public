@@ -4,8 +4,8 @@ set -euo pipefail
 # ----------------------------
 # Config
 # ----------------------------
-APP="ogs-geoserver-wms"
-IMAGE="docker.io/geoservercloud/geoserver-cloud-wms:2.28.1.3"
+APP="ogs-geoserver-wfs"
+IMAGE="docker.io/geoservercloud/geoserver-cloud-wfs:2.28.1.3"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -80,11 +80,11 @@ oc set env deployment/"${APP}" \
     GEOSERVER_ADMIN_USERNAME=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_USER}' | base64 --decode) \
     GEOSERVER_ADMIN_PASSWORD=$(oc get secret ogs-geoserver -o jsonpath='{.data.GEOSERVER_ADMIN_PASSWORD}' | base64 --decode) \
 	LOGGING_LEVEL_ORG_GEOSERVER=INFO \
-	PGCONFIG_HOST=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_HOST}' | base64 --decode) \
-	PGCONFIG_PORT=5432 \
-	PGCONFIG_DATABASE=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_DB}' | base64 --decode) \
-	PGCONFIG_USERNAME=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_USER}' | base64 --decode) \
-	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql -o jsonpath='{.data.POSTGRESQL_CONFIG_PASSWORD}' | base64 --decode) \
+	PGCONFIG_HOST=$(oc get secret ogs-postgresql-cluster-pguser-ogs-config-user -o jsonpath='{.data.host}' | base64 --decode) \
+	PGCONFIG_PORT=$(oc get secret ogs-postgresql-cluster-pguser-ogs-config-user -o jsonpath='{.data.port}' | base64 --decode) \
+	PGCONFIG_DATABASE=$(oc get secret ogs-postgresql-cluster-pguser-ogs-config-user -o jsonpath='{.data.dbname}' | base64 --decode) \
+	PGCONFIG_USERNAME=$(oc get secret ogs-postgresql-cluster-pguser-ogs-config-user -o jsonpath='{.data.user}' | base64 --decode) \
+	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql-cluster-pguser-ogs-config-user -o jsonpath='{.data.password}' | base64 --decode) \
 	PGCONFIG_SCHEMA=public \
 	PGCONFIG_INITIALIZE=true \
 	SPRING_PROFILES_ACTIVE="standalone,pgconfig" \
@@ -94,7 +94,7 @@ oc set env deployment/"${APP}" \
 	SPRING_RABBITMQ_USERNAME=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_USER}' | base64 --decode) \
 	SPRING_RABBITMQ_PASSWORD=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_PASS}' | base64 --decode) \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
-    JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+AlwaysPreTouch -XX:+UseStringDeduplication" \
+    JAVA_OPTS="-Xms512m -Xmx1g -XX:+UseG1GC -XX:+UseStringDeduplication -XX:MaxGCPauseMillis=200 -XX:MaxMetaspaceSize=256m" \
 	FLYWAY_BASELINE_ON_MIGRATE=true
 
 # ----------------------------
@@ -115,7 +115,7 @@ oc rollout status deployment/"${APP}" --timeout=300s
 if ! oc get service "${APP}" &>/dev/null; then
     echo ">>> Creating internal service..."
     oc expose deployment "${APP}" \
-      --name=wms \
+      --name=wfs \
       --port=8080 \
       --labels=app="${APP}" \
       --dry-run=client -o yaml | oc apply -f -

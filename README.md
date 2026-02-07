@@ -29,19 +29,6 @@ oc project <your project id>
 
 #### 3. Add OpenShift secrets:
 ```bash
-oc create secret generic ogs-postgresql \
-  --from-literal=POSTGRESQL_HOST=ogs-postgresql \
-  --from-literal=POSTGRESQL_SUPERUSER_USER=postgres \
-  --from-literal=POSTGRESQL_SUPERUSER_PASSWORD=***password*** \
-  --from-literal=POSTGRESQL_DATA_DB=my_gis_data \
-  --from-literal=POSTGRESQL_DATA_RO_USER=my_ro_user \
-  --from-literal=POSTGRESQL_DATA_RO_PASSWORD=***password*** \
-  --from-literal=POSTGRESQL_DATA_RW_USER=my_rw_user \
-  --from-literal=POSTGRESQL_DATA_RW_PASSWORD=***password*** \
-  --from-literal=POSTGRESQL_CONFIG_DB=my_configuration_db \
-  --from-literal=POSTGRESQL_CONFIG_USER=my_config_user \
-  --from-literal=POSTGRESQL_CONFIG_PASSWORD=***password***
-
 oc create secret generic ogs-pgadmin \
   --from-literal=PGADMIN_EMAIL=admin@example.com \
   --from-literal=PGADMIN_PASSWORD=***password***
@@ -56,37 +43,54 @@ oc create secret generic ogs-rabbitmq \
   --from-literal=RABBITMQ_DEFAULT_PASS=***password***
 ```
 
-#### 4. Build and Deploy Components (in order):
+#### 4. Build Crunchy Cluster:
+
 ```bash
-./build-postgresql.sh deploy
+Build the Crunchy cluster:
+  oc apply -f ogs-postgresql-cluster-init.yaml
+  oc apply -f ogs-postgresql-cluster.yaml
+  
+Wait for the cluster to start.  This may take a few minutes
+
+To delete the cluster and related configs:
+  oc delete postgrescluster ogs-postgresql-cluster
+  oc delete all,configmap,secret,pvc -l app=ogs-postgresql-cluster
+```
+
+#### 5. Build and Deploy GeoServer Components (in order):
+
+```bash
+./manage-geoserver-webui.sh deploy
 	- Review and confirm with 'Y'
 	
-./build-pgadmin.sh deploy
+./manage-geoserver-wfs.sh deploy
 	- Review and confirm with 'Y'
 	
-./build-geoserver-webui.sh deploy
+./manage-geoserver-wms.sh deploy
 	- Review and confirm with 'Y'
 	
-./build-geoserver-wfs.sh deploy
+./manage-geoserver-rest.sh deploy
 	- Review and confirm with 'Y'
 	
-./build-geoserver-wms.sh deploy
-	- Review and confirm with 'Y'
-	
-./build-geoserver-rest.sh deploy
-	- Review and confirm with 'Y'
-	
-./build-geoserver-gateway.sh deploy
-	- Review and confirm with 'Y'
-	
-./build-rproxy.sh deploy
-	- Review and confirm with 'Y'
-	
-./build-postgresql-cronjob.sh deploy
+./manage-geoserver-gateway.sh deploy
 	- Review and confirm with 'Y'
 ```
 
-#### 5. End points
+#### 6. Build and Deploy PGAdmin:
+
+```bash	
+./manage-pgadmin.sh deploy
+	- Review and confirm with 'Y'
+```
+
+#### 6. Build and Deploy the Reverse Proxy:
+
+```bash	
+./manage-rproxy.sh deploy
+	- Review and confirm with 'Y'
+```
+
+#### 7. End points
 - GeoServer WebUi: <a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/</a>
 - PgAdmin Web:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/pgadmin/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/pgadmin/</a>
 - RabbitMQ Management:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/rabbitmq/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/rabbitmq/</a>

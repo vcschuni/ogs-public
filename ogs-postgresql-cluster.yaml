@@ -1,0 +1,129 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: ogs-postgresql-cluster
+  labels:
+    app: ogs-postgresql-cluster
+spec:
+  postgresVersion: 17
+  postGISVersion: "3.4"
+
+  imagePullPolicy: IfNotPresent
+
+  # High Availability Instances
+  instances:
+    - name: instance1
+      replicas: 3
+      metadata:
+        labels:
+          app: ogs-postgresql-cluster
+      podTemplate:
+        metadata:
+          labels:
+            app: ogs-postgresql-cluster
+      dataVolumeClaimSpec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: netapp-block-standard
+        resources:
+          requests:
+            storage: 10Gi
+        metadata:
+          labels:
+            app: ogs-postgresql-cluster
+      walVolumeClaimSpec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: netapp-block-standard
+        resources:
+          requests:
+            storage: 5Gi
+        metadata:
+          labels:
+            app: ogs-postgresql-cluster
+
+  # Users and Databases
+  users:
+    - name: postgres
+      databases:
+        - gisdata
+      options: "SUPERUSER"
+      metadata:
+        labels:
+          app: ogs-postgresql-cluster
+          
+    - name: ogs-ro-user
+      databases:
+        - gisdata
+      options: "NOSUPERUSER"
+      metadata:
+        labels:
+          app: ogs-postgresql-cluster
+          
+    - name: ogs-rw-user
+      databases:
+        - gisdata
+      options: "NOSUPERUSER"
+      metadata:
+        labels:
+          app: ogs-postgresql-cluster
+          
+    - name: ogs-config-user
+      databases:
+        - ogs_configuration
+      options: "NOSUPERUSER"
+      metadata:
+        labels:
+          app: ogs-postgresql-cluster
+
+  # Init SQL to run after cluster creation
+  databaseInitSQL:
+    name: ogs-postgresql-cluster-init-sql
+    key: init.sql
+
+  # Patroni HA Configuration
+  patroni:
+    postgresql:
+      pg_hba:
+        - "host gisdata ogs-ro-user 10.97.0.0/16 md5"
+        - "host gisdata ogs-rw-user 10.97.0.0/16 md5"
+        - "host all all 0.0.0.0/0 scram-sha-256"
+        - "host all all ::1/128 scram-sha-256"
+      parameters:
+        shared_buffers: 128MB
+        wal_buffers: "64kB"
+        min_wal_size: 32MB
+        max_wal_size: 64MB
+        max_slot_wal_keep_size: 128MB
+        work_mem: 2MB
+        log_min_duration_statement: 1000ms
+        effective_io_concurrency: 20
+
+  # pgBackRest Backups
+  pgBackRest:
+    enabled: true
+    repos:
+      - name: repo1
+        volume:
+          volumeSource:
+            emptyDir: {}
+          metadata:
+            labels:
+              app: ogs-postgresql-cluster
+        metadata:
+          labels:
+            app: ogs-postgresql-cluster
+
+  # pgBouncer Proxy
+  proxy:
+    enabled: true
+    pgBouncer:
+      replicas: 1
+      metadata:
+        labels:
+          app: ogs-postgresql-cluster
+
+  # Monitoring
+  pgmonitor:
+    enabled: true
+    metadata:
+      labels:
+        app: ogs-postgresql-cluster
