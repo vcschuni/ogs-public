@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
 	rsync \
 	ssh \
 	nano \
+	gettext-base \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment and install pgAdmin4 + Gunicorn
