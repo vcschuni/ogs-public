@@ -1,0 +1,13 @@
+[
+  {
+    "Name": "ogs-postgresql-cluster",
+    "Group": "Servers",
+    "Host": "ogs-postgresql-cluster-primary",
+    "Port": 5432,
+    "MaintenanceDB": "postgres",
+    "Username": "postgres",
+    "Password": "${POSTGRES_PASSWORD}",
+    "SSLMode": "prefer",
+    "Comment": "Crunchy Database Cluster"
+  }
+]
