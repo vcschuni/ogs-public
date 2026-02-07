@@ -6,7 +6,7 @@ This repository contains the required components to build a **Public Facing Spat
 
 - **Nginx**: a rate limiting and caching reverse proxy exposed externally for GeoServer and PGAdmin Web
 - **GeoServer Cloud**: high performance server for transforming and sharing geospatial data
-- **PostgreSQL / PostGIS**: a powerful object-relational database system enabled with geospatial functionality
+- **PostgreSQL / PostGIS (via Crunchy)**: a powerful clustered object-relational database system enabled with geospatial functionality
 - **PGAdmin Web**: an administration and management tool for PostgreSQL databases
 
 ## Build/Deployment
@@ -47,8 +47,8 @@ oc create secret generic ogs-rabbitmq \
 
 ```bash
 Build the Crunchy cluster:
-  oc apply -f ogs-postgresql-cluster-init.yaml
-  oc apply -f ogs-postgresql-cluster.yaml
+  oc apply -f k8s/postgres/cluster-init.yaml
+  oc apply -f k8s/postgres/cluster.yaml
   
 Wait for the cluster to start.  This may take a few minutes
 
@@ -60,33 +60,33 @@ To delete the cluster and related configs:
 #### 5. Build and Deploy GeoServer Components (in order):
 
 ```bash
-./manage-geoserver-webui.sh deploy
+./scripts/manage-geoserver-webui.sh deploy
 	- Review and confirm with 'Y'
 	
-./manage-geoserver-wfs.sh deploy
+./scripts/manage-geoserver-wfs.sh deploy
 	- Review and confirm with 'Y'
 	
-./manage-geoserver-wms.sh deploy
+./scripts/manage-geoserver-wms.sh deploy
 	- Review and confirm with 'Y'
 	
-./manage-geoserver-rest.sh deploy
+./scripts/manage-geoserver-rest.sh deploy
 	- Review and confirm with 'Y'
 	
-./manage-geoserver-gateway.sh deploy
+./scripts/manage-geoserver-gateway.sh deploy
 	- Review and confirm with 'Y'
 ```
 
 #### 6. Build and Deploy PGAdmin:
 
 ```bash	
-./manage-pgadmin.sh deploy
+./scripts/manage-pgadmin.sh deploy
 	- Review and confirm with 'Y'
 ```
 
 #### 6. Build and Deploy the Reverse Proxy:
 
 ```bash	
-./manage-rproxy.sh deploy
+./scripts/manage-rproxy.sh deploy
 	- Review and confirm with 'Y'
 ```
 
