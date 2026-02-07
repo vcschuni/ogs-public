@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
 	rsync \
 	ssh \
 	nano \
-	gettext-base \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment and install pgAdmin4 + Gunicorn
@@ -27,18 +26,8 @@ ENV SCRIPT_NAME=/pgadmin
 ENV PGADMIN_LISTEN_PORT=8080
 ENV PGADMIN_SERVER_MODE=True 
 
-# Use /pgadmin-data as writable directory
-ENV PGADMIN_CONFIG_IMPORT_FILE=/pgadmin-data/servers.json
-
-# Create writable directory
-RUN mkdir -p /pgadmin-data && chmod 777 /pgadmin-data
-
-# Copy your servers template
-COPY servers.json.template /opt/pgadmin/servers.json.template
-
 # Expose port
 EXPOSE 8080
 
 # Start pgAdmin with Gunicorn
-#CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
-CMD ["sh", "-c", "envsubst < /opt/pgadmin/servers.json.template > /pgadmin-data/servers.json && gunicorn --bind 0.0.0.0:8080 pgadmin4.pgAdmin4:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
