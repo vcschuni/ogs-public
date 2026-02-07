@@ -81,21 +81,20 @@ spec:
 
   # Patroni HA Configuration
   patroni:
-    postgresql:
-      pg_hba:
-        - "host gisdata ogs-ro-user 10.97.0.0/16 md5"
-        - "host gisdata ogs-rw-user 10.97.0.0/16 md5"
-        - "host all all 0.0.0.0/0 scram-sha-256"
-        - "host all all ::1/128 scram-sha-256"
-      parameters:
-        shared_buffers: 128MB
-        wal_buffers: "64kB"
-        min_wal_size: 32MB
-        max_wal_size: 64MB
-        max_slot_wal_keep_size: 128MB
-        work_mem: 2MB
-        log_min_duration_statement: 1000ms
-        effective_io_concurrency: 20
+    dynamicConfiguration:
+      postgresql:
+        pg_hba:
+          - "host all all 0.0.0.0/0 scram-sha-256"
+          - "host all all ::1/128 scram-sha-256"
+        parameters:
+          shared_buffers: 128MB
+          wal_buffers: "64kB"
+          min_wal_size: 32MB
+          max_wal_size: 64MB
+          max_slot_wal_keep_size: 128MB
+          work_mem: 2MB
+          log_min_duration_statement: 1000ms
+          effective_io_concurrency: 20
 
   # pgBackRest Backups
   pgBackRest:
@@ -117,6 +116,9 @@ spec:
     enabled: true
     pgBouncer:
       replicas: 1
+      config:
+        global:
+          client_tls_sslmode: disable
       metadata:
         labels:
           app: ogs-postgresql-cluster
