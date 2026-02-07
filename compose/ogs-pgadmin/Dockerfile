@@ -26,8 +26,13 @@ ENV SCRIPT_NAME=/pgadmin
 ENV PGADMIN_LISTEN_PORT=8080
 ENV PGADMIN_SERVER_MODE=True 
 
+# Copy the init script
+COPY register-server.py /opt/pgadmin/register-server.py 
+RUN chmod +x /opt/pgadmin/register-server.py 
+
 # Expose port
 EXPOSE 8080
 
 # Start pgAdmin with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
+#CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
+CMD ["sh", "-c", "/opt/pgadmin/venv/bin/python /opt/pgadmin/register-server.py && gunicorn --bind 0.0.0.0:8080 pgadmin4.pgAdmin4:app"]

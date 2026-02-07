@@ -46,7 +46,7 @@ oc create secret generic ogs-rabbitmq \
 #### 4. Build Crunchy Cluster:
 
 ```bash
-Build the Crunchy cluster:
+Build the database cluster:
   oc apply -f k8s/postgres/cluster-init.yaml
   oc apply -f k8s/postgres/cluster.yaml
   

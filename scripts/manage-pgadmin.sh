@@ -151,18 +151,19 @@ oc patch deployment "${APP}" --type=json -p='[
 # ----------------------------
 oc set env deployment/"${APP}" \
     PGADMIN_SETUP_EMAIL=$(oc get secret ogs-pgadmin -o jsonpath='{.data.PGADMIN_EMAIL}' | base64 --decode) \
-    PGADMIN_SETUP_PASSWORD=$(oc get secret ogs-pgadmin -o jsonpath='{.data.PGADMIN_PASSWORD}' | base64 --decode)
+    PGADMIN_SETUP_PASSWORD=$(oc get secret ogs-pgadmin -o jsonpath='{.data.PGADMIN_PASSWORD}' | base64 --decode) \
+	POSTGRES_PASSWORD=$(oc get secret ogs-postgresql-cluster-pguser-postgres -o jsonpath='{.data.password}' | base64 --decode)
 
 # ----------------------------
 # Attach PVC
 # ----------------------------
-echo ">>> Attaching PVC..."
-oc set volume deployment/"${APP}" \
-    --add \
-	--name="${APP}-data" \
-    --type=pvc \
-    --claim-name="${APP}-data" \
-    --mount-path=/var/lib/pgadmin
+# echo ">>> Attaching PVC..."
+# oc set volume deployment/"${APP}" \
+    # --add \
+	# --name="${APP}-data" \
+    # --type=pvc \
+    # --claim-name="${APP}-data" \
+    # --mount-path=/var/lib/pgadmin
 
 # ----------------------------
 # Set resources
