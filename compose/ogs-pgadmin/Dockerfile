@@ -36,4 +36,5 @@ EXPOSE 8080
 
 # Start pgAdmin with Gunicorn
 #CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:8080 pgadmin4.pgAdmin4:app & /opt/pgadmin/register-server.sh && wait"]
+CMD ["sh", "-c", "/opt/pgadmin/register-server.sh && exec gunicorn --bind 0.0.0.0:8080 pgadmin4.pgAdmin4:app"]
+
