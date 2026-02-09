@@ -43,7 +43,14 @@ oc create secret generic ogs-rabbitmq \
   --from-literal=RABBITMQ_DEFAULT_PASS=***password***
 ```
 
-#### 4. Build Crunchy Cluster:
+#### 4. Build & Deploy Message Broker:
+
+```bash	
+./scripts/manage-rabbitmq.sh deploy
+	- Review and confirm with 'Y'
+```
+
+#### 5. Build Crunchy Cluster:
 
 ```bash
 Build the database cluster:
@@ -57,8 +64,9 @@ To delete the cluster and related configs:
   oc delete all,configmap,secret,pvc -l app=ogs-postgresql-cluster
 ```
 
-#### 5. Build and Deploy GeoServer Components (in order):
+#### 6. Build and Deploy GeoServer Components:
 
+You can do this by individual component (in order):
 ```bash
 ./scripts/manage-geoserver-webui.sh deploy
 	- Review and confirm with 'Y'
@@ -76,21 +84,27 @@ To delete the cluster and related configs:
 	- Review and confirm with 'Y'
 ```
 
-#### 6. Build and Deploy PGAdmin:
+or in one swoop:
+```bash
+./scripts/manage-geoserver.sh deploy
+	- Review and confirm with 'Y'
+```
+
+#### 7. Build and Deploy PGAdmin:
 
 ```bash	
 ./scripts/manage-pgadmin.sh deploy
 	- Review and confirm with 'Y'
 ```
 
-#### 6. Build and Deploy the Reverse Proxy:
+#### 8. Build and Deploy the Reverse Proxy:
 
 ```bash	
 ./scripts/manage-rproxy.sh deploy
 	- Review and confirm with 'Y'
 ```
 
-#### 7. End points
+#### 9. End points
 - GeoServer WebUi: <a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/</a>
 - PgAdmin Web:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/pgadmin/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/pgadmin/</a>
 - RabbitMQ Management:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/rabbitmq/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/rabbitmq/</a>

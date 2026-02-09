@@ -195,5 +195,4 @@ oc delete builds -l app="${APP}" --ignore-not-found --wait=true
 # ----------------------------
 echo
 echo ">>> COMPLETE — ${APP} deployed!"
-echo ">>> To rollback: oc rollout undo deployment/${APP}"
 echo

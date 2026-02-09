@@ -120,14 +120,8 @@ if ! oc get service "${APP}" &>/dev/null; then
 fi
 
 # ----------------------------
-# Cleanup builds
-# ----------------------------
-oc delete builds -l app="${APP}" --ignore-not-found --wait=true
-
-# ----------------------------
 # Final status
 # ----------------------------
 echo
 echo ">>> COMPLETE — ${APP} deployed!"
-echo ">>> To rollback: oc rollout undo deployment/${APP}"
 echo

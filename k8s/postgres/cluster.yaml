@@ -26,7 +26,7 @@ spec:
         storageClassName: netapp-block-standard
         resources:
           requests:
-            storage: 10Gi
+            storage: 12Gi
         metadata:
           labels:
             app: ogs-postgresql-cluster
@@ -84,15 +84,15 @@ spec:
     dynamicConfiguration:
       postgresql:
         pg_hba:
-          - "host all all 0.0.0.0/0 scram-sha-256"
+          - "host all all 10.0.0.0/8 scram-sha-256"
           - "host all all ::1/128 scram-sha-256"
         parameters:
-          shared_buffers: 128MB
-          wal_buffers: "64kB"
+          shared_buffers: 768MB
+          wal_buffers: "12MB"
           min_wal_size: 32MB
           max_wal_size: 64MB
           max_slot_wal_keep_size: 128MB
-          work_mem: 2MB
+          work_mem: 12MB
           log_min_duration_statement: 1000ms
           effective_io_concurrency: 20
 
@@ -102,20 +102,28 @@ spec:
     repos:
       - name: repo1
         volume:
-          volumeSource:
-            emptyDir: {}
+          claimSpec:
+            accessModes: ["ReadWriteOnce"]
+            storageClassName: netapp-block-standard
+            resources:
+              requests:
+                storage: 5Gi
           metadata:
             labels:
               app: ogs-postgresql-cluster
         metadata:
           labels:
             app: ogs-postgresql-cluster
+    backup:
+      schedules:
+        full:
+          cron: "0 6,18 * * *"
 
   # pgBouncer Proxy
   proxy:
     enabled: true
     pgBouncer:
-      replicas: 1
+      replicas: 2
       config:
         global:
           client_tls_sslmode: disable

@@ -178,5 +178,4 @@ fi
 # ----------------------------
 echo
 echo ">>> COMPLETE — ${APP} deployed!"
-echo ">>> To rollback: oc rollout undo deployment/${APP}"
 echo
