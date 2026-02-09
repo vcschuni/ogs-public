@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
 	rsync \
 	ssh \
 	nano \
+	sqlite3 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment and install pgAdmin4 + Gunicorn
@@ -26,8 +27,13 @@ ENV SCRIPT_NAME=/pgadmin
 ENV PGADMIN_LISTEN_PORT=8080
 ENV PGADMIN_SERVER_MODE=True 
 
+# Copy script to register server
+COPY register-server.sh /opt/pgadmin/register-server.sh
+RUN chmod +x /opt/pgadmin/register-server.sh
+
 # Expose port
 EXPOSE 8080
 
 # Start pgAdmin with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
+#CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:8080 pgadmin4.pgAdmin4:app & /opt/pgadmin/register-server.sh && wait"]
