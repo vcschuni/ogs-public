@@ -27,14 +27,15 @@ ENV SCRIPT_NAME=/pgadmin
 ENV PGADMIN_LISTEN_PORT=8080
 ENV PGADMIN_SERVER_MODE=True 
 
-# Copy script to register server
+# Copy scripts & make them executable
 COPY register-server.sh /opt/pgadmin/register-server.sh
-RUN chmod +x /opt/pgadmin/register-server.sh
+COPY start.sh /opt/pgadmin/start.sh
+RUN chmod +x /opt/pgadmin/*.sh
 
 # Expose port
 EXPOSE 8080
 
 # Start pgAdmin with Gunicorn
 #CMD ["gunicorn", "--bind", "0.0.0.0:8080", "pgadmin4.pgAdmin4:app"]
-CMD ["sh", "-c", "/opt/pgadmin/register-server.sh && exec gunicorn --bind 0.0.0.0:8080 pgadmin4.pgAdmin4:app"]
+CMD ["/opt/pgadmin/start.sh"]
 
