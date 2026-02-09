@@ -157,13 +157,13 @@ oc set env deployment/"${APP}" \
 # ----------------------------
 # Attach PVC
 # ----------------------------
-# echo ">>> Attaching PVC..."
-# oc set volume deployment/"${APP}" \
-    # --add \
-	# --name="${APP}-data" \
-    # --type=pvc \
-    # --claim-name="${APP}-data" \
-    # --mount-path=/var/lib/pgadmin
+echo ">>> Attaching PVC..."
+oc set volume deployment/"${APP}" \
+    --add \
+	--name="${APP}-data" \
+    --type=pvc \
+    --claim-name="${APP}-data" \
+    --mount-path=/var/lib/pgadmin
 
 # ----------------------------
 # Set resources
