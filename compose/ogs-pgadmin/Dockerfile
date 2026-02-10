@@ -1,10 +1,10 @@
 # Start from Debian slim
-FROM docker.io/debian:bookworm-slim
+FROM docker.io/debian:trixie-slim
 
 # Install Python and dependencies
 RUN apt-get update && apt-get install -y \
     postgresql-client \
-	python3.11 python3.11-venv python3-pip \
+	python3.13 python3.13-venv python3-pip \
     libpq-dev build-essential \
     curl \
 	bash \
@@ -14,12 +14,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment and install pgAdmin4 + Gunicorn
-RUN python3.11 -m venv /opt/pgadmin/venv \
+RUN python3.13 -m venv /opt/pgadmin/venv \
     && /opt/pgadmin/venv/bin/pip install --upgrade pip \
     && /opt/pgadmin/venv/bin/pip install pgadmin4 gunicorn
 
 # pgAdmin overrides
-RUN echo "LOG_FILE = '/tmp/pgadmin.log'" > /opt/pgadmin/venv/lib/python3.11/site-packages/pgadmin4/config_local.py
+RUN echo "LOG_FILE = '/tmp/pgadmin.log'" > /opt/pgadmin/venv/lib/python3.13/site-packages/pgadmin4/config_local.py
 
 # Set environment variables
 ENV PATH="/opt/pgadmin/venv/bin:$PATH"
