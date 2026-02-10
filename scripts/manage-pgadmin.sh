@@ -111,8 +111,8 @@ fi
 # Needs to match Dockerfile
 # ----------------------------
 echo ">>> Import base image..."
-oc import-image debian:bullseye-slim \
-	--from=docker.io/debian:bullseye-slim \
+oc import-image debian:bookworm-slim \
+	--from=docker.io/debian:bookworm-slim \
 	--confirm
 
 # ----------------------------
