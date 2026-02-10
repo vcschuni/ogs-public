@@ -86,7 +86,6 @@ oc set env deployment/"${APP}" \
 	PGCONFIG_USERNAME=$(oc get secret ogs-postgresql-cluster-pguser-ogs-config-user -o jsonpath='{.data.user}' | base64 --decode) \
 	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql-cluster-pguser-ogs-config-user -o jsonpath='{.data.password}' | base64 --decode) \
 	PGCONFIG_SCHEMA=public \
-	PGCONFIG_INITIALIZE=true \
 	SPRING_PROFILES_ACTIVE="standalone,pgconfig" \
 	SPRING_CLOUD_BUS_ENABLED=true \
 	SPRING_RABBITMQ_HOST=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_HOST}' | base64 --decode) \
