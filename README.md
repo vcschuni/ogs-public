@@ -3,11 +3,23 @@
 This repository contains the required components to build a **Public Facing Spatial Service** on the BCGov OpenShift Environment.
 
 ## Architecture
+#### Technology Stack:
+- **Nginx**: a rate limiting and caching reverse proxy exposed externally for GeoServer and PGAdmin Web.
+- **GeoServer Cloud**: high performance server for transforming and sharing geospatial data.
+- **PostgreSQL / PostGIS (via Crunchy)**: a powerful clustered object-relational database system enabled with geospatial functionality.
+- **PGAdmin Web**: an administration and management tool for PostgreSQL databases.
+- **RabbitMQ**: a message broker that allows individual GeoServer Cloud microservices to communicate with each other.
 
-- **Nginx**: a rate limiting and caching reverse proxy exposed externally for GeoServer and PGAdmin Web
-- **GeoServer Cloud**: high performance server for transforming and sharing geospatial data
-- **PostgreSQL / PostGIS (via Crunchy)**: a powerful clustered object-relational database system enabled with geospatial functionality
-- **PGAdmin Web**: an administration and management tool for PostgreSQL databases
+#### Databases:
+- **ogs_configuration**: a database that stores GeoServer Cloud configuration.  Each GeoServer microservice (webui, wfs, etc) connects to it.
+- **gisdata**: a database that stores all your geospatial data.
+
+#### User Accounts:
+- **postgres**: the superuser for administering the postgresql cluster
+- **ogs-config-user**: the user that GeoServer Cloud uses to connect to the ogs_configuration database.
+- **ogs-ro-user**: a read-only user for the gisdata database.
+- **ogs-rw-user**: a read-write user for the gisdata database.
+
 
 ## Build/Deployment
 #### Requirements:
@@ -53,11 +65,9 @@ oc create secret generic ogs-rabbitmq \
 #### 5. Build Crunchy Cluster:
 
 ```bash
-Build the database cluster:
-  oc apply -f k8s/postgres/cluster-init.yaml
-  oc apply -f k8s/postgres/cluster.yaml
-  
-Wait for the cluster to start.  This may take a few minutes
+oc apply -f k8s/postgres/cluster-init.yaml
+oc apply -f k8s/postgres/cluster.yaml
+oc wait --for=condition=Ready postgrescluster/ogs-postgresql-cluster --timeout=20m
 ```
 
 #### 6. Build and Deploy GeoServer Components:
@@ -100,11 +110,22 @@ or in one swoop:
 	- Review and confirm with 'Y'
 ```
 
-#### 9. End points
+#### 9. Start adding tables, data, layers, security, etc.
+
+The following endpoints are available to build your own custom setup:
 - GeoServer WebUi: <a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/</a>
 - PgAdmin Web:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/pgadmin/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/pgadmin/</a>
 - RabbitMQ Management:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/rabbitmq/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/rabbitmq/</a>
 
+User account details are available as secrets within:
+- ogs-postgresql-cluster-pguser-ogs-ro-user
+- ogs-postgresql-cluster-pguser-ogs-rw-user
+- ogs-postgresql-cluster-pguser-postgres
+
+## TODO
+- There is currently no backup solution for the database cluster.  This project was designed to be a slave entity to an enterprise solution with master data. 
+All data within is replicated.
+  
 ## Removal / Cleanup
 To remove the database cluster, deployments, builds, etc. built and deployed above:
 
