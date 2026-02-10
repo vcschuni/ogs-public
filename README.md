@@ -58,10 +58,6 @@ Build the database cluster:
   oc apply -f k8s/postgres/cluster.yaml
   
 Wait for the cluster to start.  This may take a few minutes
-
-To delete the cluster and related configs:
-  oc delete postgrescluster ogs-postgresql-cluster
-  oc delete all,configmap,secret,pvc -l app=ogs-postgresql-cluster
 ```
 
 #### 6. Build and Deploy GeoServer Components:
@@ -109,4 +105,25 @@ or in one swoop:
 - PgAdmin Web:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/pgadmin/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/pgadmin/</a>
 - RabbitMQ Management:<a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/rabbitmq/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/rabbitmq/</a>
 
+## Removal / Cleanup
+To remove the database cluster, deployments, builds, etc. built and deployed above:
+
+```bash
+./scripts/manage-geoserver.sh remove
+	- Review and confirm with 'Y'
+	
+./scripts/manage-rabbitmq.sh remove
+	- Review and confirm with 'Y'
+	
+./scripts/manage-pgadmin.sh remove
+	- Review and confirm with 'Y'
+	
+./scripts/manage-rproxy.sh remove
+	- Review and confirm with 'Y'
+
+oc delete postgrescluster ogs-postgresql-cluster
+oc delete all,configmap,secret,pvc -l app=ogs-postgresql-cluster
+
+Delete PVC's as required
+```
 
