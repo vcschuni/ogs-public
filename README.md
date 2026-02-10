@@ -108,6 +108,8 @@ or in one swoop:
 ## Removal / Cleanup
 To remove the database cluster, deployments, builds, etc. built and deployed above:
 
+*** WARNING:  YOU WILL LOSE DATA ***
+
 ```bash
 ./scripts/manage-geoserver.sh remove
 	- Review and confirm with 'Y'
@@ -124,6 +126,6 @@ To remove the database cluster, deployments, builds, etc. built and deployed abo
 oc delete postgrescluster ogs-postgresql-cluster
 oc delete all,configmap,secret,pvc -l app=ogs-postgresql-cluster
 
-Delete PVC's as required
+Delete remaining PVC's as required
 ```
 
