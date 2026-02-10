@@ -11,7 +11,19 @@ DB_PORT=5432
 BACKUP_DIR="/var/lib/pgadmin/storage/spatialadmin_gov.bc.ca/backups" 
 RETENTION_DAYS=14
 DATABASES=("postgres" "gisdata" "ogs_configuration")
-DATESTAMP=$(date +'%Y%m%d_%H')
+DATESTAMP=$(date +'%Y%m%d-%H')
+
+# -----------------------------
+# Make the backup dir if it does not exist
+# -----------------------------
+mkdir -p "${BACKUP_DIR}"
+
+# -----------------------------
+# Logging setup
+# -----------------------------
+mkdir -p "${BACKUP_DIR}"
+LOG_FILE="${BACKUP_DIR}/${DATESTAMP}.log"
+exec > >(tee -a "${LOG_FILE}") 2>&1
 
 # -----------------------------
 # Start header
@@ -20,9 +32,10 @@ START_TS=$(date +"%Y-%m-%d %H:%M:%S %Z")
 START_EPOCH=$(date +%s)
 
 echo "========================================"
-echo " PostgreSQL Backup Job START"
-echo " Start Time : ${START_TS}"
-echo " Host       : $(hostname)"
+echo " PostgreSQL Backup"
+echo
+echo " Start Time: ${START_TS}"
+echo "       Host: $(hostname)"
 echo "========================================"
 
 # -----------------------------
@@ -37,10 +50,9 @@ footer() {
 
     echo
     echo "========================================"
-    echo " PostgreSQL Backup Job END"
-    echo " End Time   : ${END_TS}"
-    echo " Duration   : ${DURATION_FMT}"
-    echo " Exit Code  : ${EXIT_CODE}"
+    echo "   End Time: ${END_TS}"
+    echo "   Duration: ${DURATION_FMT}"
+    echo "  Exit Code: ${EXIT_CODE}"
     echo "========================================"
     echo
 }
@@ -53,15 +65,10 @@ trap 'EXIT_CODE=$?; footer' EXIT
 export PGPASSWORD="$DB_PASSWORD"
 
 # -----------------------------
-# Make the backup dir if it does not exist
-# -----------------------------
-mkdir -p "${BACKUP_DIR}"
-
-# -----------------------------
 # Backup loop
 # -----------------------------
 for DB_NAME in "${DATABASES[@]}"; do
-    BACKUP_FILE="${BACKUP_DIR}/${DB_NAME}_backup_${DATESTAMP}.dump"
+    BACKUP_FILE="${BACKUP_DIR}/${DATESTAMP}_${DB_NAME}.dump"
     echo
     echo "Backing up database '${DB_NAME}' to '${BACKUP_FILE}'..."
 
