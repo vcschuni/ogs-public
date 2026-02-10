@@ -27,6 +27,10 @@ ENV SCRIPT_NAME=/pgadmin
 ENV PGADMIN_LISTEN_PORT=8080
 ENV PGADMIN_SERVER_MODE=True 
 
+# Copy scripts and set permissions
+COPY scripts/* /scripts/
+RUN chmod -R 777 /scripts
+
 # Expose port
 EXPOSE 8080
 
