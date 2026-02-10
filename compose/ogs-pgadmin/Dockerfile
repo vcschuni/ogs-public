@@ -3,7 +3,8 @@ FROM docker.io/debian:bullseye-slim
 
 # Install Python and dependencies
 RUN apt-get update && apt-get install -y \
-    python3.9 python3.9-venv python3-pip \
+    postgresql-client \
+	python3.9 python3.9-venv python3-pip \
     libpq-dev build-essential \
     curl \
 	bash \

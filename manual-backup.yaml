@@ -1,0 +1,7 @@
+spec:
+  backups:
+    pgbackrest:
+      manual:
+        repoName: repo1
+        options:
+          - --type=full
