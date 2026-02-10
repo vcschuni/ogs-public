@@ -8,7 +8,7 @@ DB_USER="postgres"
 DB_PASSWORD="${POSTGRES_PASSWORD}"
 DB_HOST="ogs-postgresql-cluster-primary"
 DB_PORT=5432
-BACKUP_DIR="/backup"
+BACKUP_DIR="/var/lib/pgadmin/storage/spatialadmin_gov.bc.ca/backups" 
 RETENTION_DAYS=14
 DATABASES=("postgres" "gisdata" "ogs_configuration")
 DATESTAMP=$(date +'%Y%m%d_%H')
@@ -51,6 +51,11 @@ trap 'EXIT_CODE=$?; footer' EXIT
 # Export password for pg_dump
 # -----------------------------
 export PGPASSWORD="$DB_PASSWORD"
+
+# -----------------------------
+# Make the backup dir if it does not exist
+# -----------------------------
+mkdir -p "${BACKUP_DIR}"
 
 # -----------------------------
 # Backup loop

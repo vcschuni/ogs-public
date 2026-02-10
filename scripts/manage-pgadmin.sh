@@ -6,8 +6,7 @@ set -euo pipefail
 # ----------------------------
 APP="ogs-pgadmin"
 REPO="https://github.com/vcschuni/ogs-public.git"
-PVC_SIZE_DATA="500Mi"
-PVC_SIZE_BACKUP="1Gi"
+PVC_SIZE="2Gi"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -85,7 +84,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: ${PVC_SIZE_DATA}
+      storage: ${PVC_SIZE}
 EOF
 	echo ">>> Waiting for PVC to be ready..."
 	COUNT=0
@@ -105,42 +104,6 @@ EOF
 	done
 else
     echo ">>> PVC ${APP}-data already exists, skipping creation"
-fi
-
-if ! oc get pvc "${APP}-backup" &>/dev/null; then
-    echo ">>> Creating PVC for backup..."
-    oc apply -f - <<EOF
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: ${APP}-backup
-  labels: 
-    app: ${APP} 
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: ${PVC_SIZE_BACKUP}
-EOF
-	echo ">>> Waiting for PVC to be ready..."
-	COUNT=0
-	while true; do
-		STATUS=$(oc get pvc "${APP}-backup" -o jsonpath='{.status.phase}')
-		echo "Current status: $STATUS"
-		if [[ "$STATUS" == "Bound" ]]; then
-			echo ">>> PVC is ready!"
-			break
-		fi
-		sleep 5
-		COUNT=$((COUNT+1))
-		if [[ $COUNT -ge 30 ]]; then
-			echo ">>> Timeout waiting for PVC!"
-			exit 1
-		fi
-	done
-else
-    echo ">>> PVC ${APP}-backup already exists, skipping creation"
 fi
 
 # ----------------------------
@@ -194,19 +157,13 @@ oc set env deployment/"${APP}" \
 # ----------------------------
 # Attach PVC
 # ----------------------------
-echo ">>> Attaching PVCs..."
+echo ">>> Attaching PVC..."
 oc set volume deployment/"${APP}" \
     --add \
 	--name="${APP}-data" \
     --type=pvc \
     --claim-name="${APP}-data" \
     --mount-path=/var/lib/pgadmin
-oc set volume deployment/"${APP}" \
-    --add \
-	--name="${APP}-backup" \
-    --type=pvc \
-    --claim-name="${APP}-backup" \
-    --mount-path=/backup
 
 # ----------------------------
 # Set resources
