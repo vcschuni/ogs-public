@@ -96,29 +96,6 @@ spec:
           log_min_duration_statement: 1000ms
           effective_io_concurrency: 20
 
-  # pgBackRest Backups
-  pgBackRest:
-    enabled: true
-    repos:
-      - name: repo1
-        volume:
-          claimSpec:
-            accessModes: ["ReadWriteOnce"]
-            storageClassName: netapp-block-standard
-            resources:
-              requests:
-                storage: 5Gi
-          metadata:
-            labels:
-              app: ogs-postgresql-cluster
-        metadata:
-          labels:
-            app: ogs-postgresql-cluster
-    backup:
-      schedules:
-        full:
-          cron: "0 6,18 * * *"
-
   # pgBouncer Proxy
   proxy:
     enabled: true
