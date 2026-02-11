@@ -32,10 +32,8 @@ START_TS=$(date +"%Y-%m-%d %H:%M:%S %Z")
 START_EPOCH=$(date +%s)
 
 echo "========================================"
-echo " PostgreSQL Backup"
-echo
+echo "  Operation: PostgreSQL Backup"
 echo " Start Time: ${START_TS}"
-echo "       Host: $(hostname)"
 echo "========================================"
 
 # -----------------------------
@@ -50,9 +48,8 @@ footer() {
 
     echo
     echo "========================================"
-    echo "   End Time: ${END_TS}"
-    echo "   Duration: ${DURATION_FMT}"
-    echo "  Exit Code: ${EXIT_CODE}"
+    echo " End Time: ${END_TS}"
+    echo " Duration: ${DURATION_FMT}"
     echo "========================================"
     echo
 }

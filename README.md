@@ -33,7 +33,7 @@ git clone https://github.com/vcschuni/ogs-public.git
 cd ogs-public
 ```
 
-#### 2. Login to OpenShift DEV Project:
+#### 2. Login to OpenShift Cluster & Set the Project:
 ```bash
 oc login --token=<token> --server=https://api.silver.devops.gov.bc.ca:6443
 oc project <your project id>
@@ -55,7 +55,7 @@ oc create secret generic ogs-rabbitmq \
   --from-literal=RABBITMQ_DEFAULT_PASS=***password***
 ```
 
-#### 4. Build & Deploy Message Broker:
+#### 4. Deploy Message Broker:
 
 ```bash	
 ./scripts/manage-rabbitmq.sh deploy
@@ -70,7 +70,7 @@ oc apply -f k8s/postgres/cluster.yaml
 oc wait --for=condition=Ready postgrescluster/ogs-postgresql-cluster --timeout=20m
 ```
 
-#### 6. Build and Deploy GeoServer Components:
+#### 6. Deploy GeoServer Components:
 
 You can do this by individual component (in order):
 ```bash
@@ -96,21 +96,28 @@ or in one swoop:
 	- Review and confirm with 'Y'
 ```
 
-#### 7. Build and Deploy PGAdmin:
+#### 7. Deploy PGAdmin:
 
 ```bash	
 ./scripts/manage-pgadmin.sh deploy
 	- Review and confirm with 'Y'
 ```
 
-#### 8. Build and Deploy the Reverse Proxy:
+#### 8. Deploy Cronjobs:
+
+```bash	
+./scripts/manage-cronjob-db-backup.sh deploy
+	- Review and confirm with 'Y'
+```
+
+#### 9. Deploy the Reverse Proxy:
 
 ```bash	
 ./scripts/manage-rproxy.sh deploy
 	- Review and confirm with 'Y'
 ```
 
-#### 9. Start adding tables, data, layers, security, etc.
+#### 10. Start adding tables, data, layers, security, etc.
 
 The following endpoints are available to build your own custom setup:
 - GeoServer WebUi: <a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/</a>
@@ -122,10 +129,15 @@ User account details are available as secrets within:
 - ogs-postgresql-cluster-pguser-ogs-rw-user
 - ogs-postgresql-cluster-pguser-postgres
 
-## TODO
-- There is currently no backup solution for the database cluster.  This project was designed to be a slave entity to an enterprise solution with master data. 
-All data within is replicated.
-  
+## Notes
+
+- The database backup cronjob writes it's database dump files to PgAdmin's PVC.
+
+## Tips & Tricks
+
+- Scale the ogs-geoserver-webui & ogs-pgadmin deployments to 0 pods when not in use.  This improves security and reduces resource usage. 
+- Use PgAdmin's Storage Manager to view/download backups. 
+
 ## Removal / Cleanup
 To remove the database cluster, deployments, builds, etc. built and deployed above:
 

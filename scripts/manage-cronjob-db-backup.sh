@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ----------------------------
+# Config
+# ----------------------------
+APP="ogs-cronjob-db-backup"
+TARGET_IMAGE="ogs-pgadmin:latest"
+TARGET_SCRIPT="/scripts/backup-databases.sh"
+SCHEDULE="0 6,18 * * *"
+PVC_NAME="ogs-pgadmin-data"
+
+# ----------------------------
+# Verify passed arg and show help if required
+# ----------------------------
+OPTIONS=("deploy" "remove")
+ACTION="${1:-}"
+if [[ ! " ${OPTIONS[*]} " =~ " ${ACTION} " ]]; then
+    echo
+    echo "USAGE: $(basename "$0") <${OPTIONS[*]// /|}>"
+    echo "EXAMPLE: $(basename "$0") ${OPTIONS[0]}"
+    echo
+    exit 1
+fi
+
+# ----------------------------
+# Get current project
+# ----------------------------
+PROJ=$(oc project -q)
+
+# ----------------------------
+# Confirm action
+# ----------------------------
+echo
+echo "========================================"
+echo " Action:            ${ACTION}"
+echo " App:               ${APP}"
+echo " Project:           ${PROJ}"
+echo "========================================"
+echo
+read -r -p "Continue? [y/N]: " CONFIRM
+case "${CONFIRM:-N}" in
+  [yY]|[yY][eE][sS])
+    echo ">>> Proceeding..."
+    ;;
+  *)
+    echo ">>> Cancelled"
+    exit 0
+    ;;
+esac
+
+# ----------------------------
+# Cleanup
+# ----------------------------
+echo ">>> Removing old ${APP} resources..."
+oc delete cronjob "${APP}" --cascade=background --ignore-not-found --wait=true
+
+# ----------------------------
+# Stop here if remove was requested
+# ----------------------------
+if [[ "${ACTION}" == "remove" ]]; then
+	echo ""
+	echo ">>> Remove completed successfully"
+	echo ""
+	exit
+fi
+
+# ----------------------------
+# Set cronjob
+# ----------------------------
+echo ">>> Creating cronjob..."
+oc create cronjob "${APP}" \
+  --schedule="${SCHEDULE}" \
+  --image=image-registry.openshift-image-registry.svc:5000/"${PROJ}"/"${TARGET_IMAGE}" \
+  -- /bin/bash -c "${TARGET_SCRIPT}"
+
+# ----------------------------
+# Set cronjob limits
+# ----------------------------
+oc patch cronjob "${APP}" --type=merge -p '{
+  "spec":{
+    "successfulJobsHistoryLimit":1,
+    "failedJobsHistoryLimit":1,
+    "concurrencyPolicy":"Forbid",
+    "jobTemplate":{
+      "spec":{
+        "template":{
+          "spec":{
+            "restartPolicy":"Never"
+          }
+        }
+      }
+    }
+  }
+}'
+
+# ----------------------------
+# Inject runtime variables
+# ----------------------------
+oc set env cronjob/"${APP}" \
+	POSTGRES_PASSWORD=$(oc get secret ogs-postgresql-cluster-pguser-postgres -o jsonpath='{.data.password}' | base64 --decode)
+
+# ----------------------------
+# Attach PVC (same as pgAdmin)
+# ----------------------------
+echo ">>> Attaching PVC..."
+oc set volume cronjob/"${APP}" \
+    --add \
+    --name="${PVC_NAME}" \
+    --type=pvc \
+    --claim-name="${PVC_NAME}" \
+    --mount-path=/var/lib/pgadmin
+
+# ----------------------------
+# Final status
+# ----------------------------
+echo
+echo ">>> COMPLETE — ${APP} deployed!"
+echo

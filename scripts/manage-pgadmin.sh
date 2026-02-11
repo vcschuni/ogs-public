@@ -81,7 +81,7 @@ metadata:
     app: ${APP} 
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: ${PVC_SIZE}
