@@ -75,6 +75,15 @@ oc create cronjob "${APP}" \
   -- /bin/bash -c "${TARGET_SCRIPT}"
 
 # ----------------------------
+# Set cronjob to PST
+# ----------------------------
+oc patch cronjob "${APP}" --type=merge -p '{
+  "spec": {
+    "timeZone": "America/Los_Angeles"
+  }
+}'
+
+# ----------------------------
 # Set cronjob limits
 # ----------------------------
 oc patch cronjob "${APP}" --type=merge -p '{
