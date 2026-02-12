@@ -160,14 +160,14 @@ oc rollout status deployment/"${APP}" --timeout=300s
 if ! oc get service "${APP}" &>/dev/null; then
     echo ">>> Creating internal service..."
     oc expose deployment "${APP}" \
-      --name="$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_HOST}' | base64 --decode)" \
+      --name="${APP}" \
       --port=5672 \
       --labels=app="${APP}" \
       --dry-run=client -o yaml | oc apply -f -
 
     # Optionally expose management UI internally
     oc expose deployment "${APP}" \
-      --name="$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_HOST}' | base64 --decode)-management" \
+      --name="${APP}-management" \
       --port=15672 \
       --labels=app="${APP}" \
       --dry-run=client -o yaml | oc apply -f -
