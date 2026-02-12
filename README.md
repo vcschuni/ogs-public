@@ -131,6 +131,7 @@ User account details are available as secrets within:
 
 ## Notes
 
+- Deployment order is critical as some components rely on the existence of resources created by other components.
 - The database backup cronjob writes it's database dump files to PgAdmin's PVC.
 
 ## Tips & Tricks
