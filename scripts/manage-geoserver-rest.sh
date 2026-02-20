@@ -86,11 +86,18 @@ oc set env deployment/"${APP}" \
 	PGCONFIG_USERNAME=$(oc get secret ogs-postgresql-cluster-pguser-ogs-config-user -o jsonpath='{.data.user}' | base64 --decode) \
 	PGCONFIG_PASSWORD=$(oc get secret ogs-postgresql-cluster-pguser-ogs-config-user -o jsonpath='{.data.password}' | base64 --decode) \
 	PGCONFIG_SCHEMA=public \
+	SPRING_PROFILES_ACTIVE="standalone,pgconfig,eventbus-rabbit,restconfig_service" \
+	SPRING_CLOUD_BUS_ENABLED=true \
 	SPRING_RABBITMQ_HOST=ogs-rabbitmq \
 	SPRING_RABBITMQ_PORT=5672 \
 	SPRING_RABBITMQ_USERNAME=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_USER}' | base64 --decode) \
 	SPRING_RABBITMQ_PASSWORD=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_PASS}' | base64 --decode) \
-	SPRING_PROFILES_ACTIVE="standalone,pgconfig,eventbus-rabbit,restconfig_service" \
+	SPRING_RABBITMQ_REQUESTED_HEARTBEAT=30 \
+	SPRING_RABBITMQ_CONNECTION_TIMEOUT=10000 \
+	SPRING_RABBITMQ_LISTENER_SIMPLE_RETRY_ENABLED=true \
+	SPRING_RABBITMQ_LISTENER_SIMPLE_RETRY_MAX_ATTEMPTS=20 \
+	SPRING_RABBITMQ_LISTENER_SIMPLE_RETRY_INITIAL_INTERVAL=10000 \
+	SPRING_RABBITMQ_LISTENER_SIMPLE_RETRY_MULTIPLIER=1.5 \
     CATALINA_OPTS="-DALLOW_ENV_PARAMETRIZATION=true" \
     JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200" \
 	FLYWAY_BASELINE_ON_MIGRATE=true

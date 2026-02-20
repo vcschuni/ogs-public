@@ -50,7 +50,6 @@ oc create secret generic ogs-geoserver \
   --from-literal=GEOSERVER_ADMIN_PASSWORD=***password***
   
 oc create secret generic ogs-rabbitmq \
-  --from-literal=RABBITMQ_HOST=ogs-rabbitmq \
   --from-literal=RABBITMQ_DEFAULT_USER=admin \
   --from-literal=RABBITMQ_DEFAULT_PASS=***password***
 ```

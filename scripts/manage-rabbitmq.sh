@@ -6,7 +6,6 @@ set -euo pipefail
 # ----------------------------
 APP="ogs-rabbitmq"
 IMAGE="docker.io/rabbitmq:3.11-management"
-PVC_SIZE="2Gi"
 
 # ----------------------------
 # Verify passed arg and show help if required
@@ -61,55 +60,6 @@ oc delete hpa "${APP}" --ignore-not-found --wait=true
 [[ "${ACTION}" == "remove" ]] && { echo ">>> Remove completed successfully"; exit 0; }
 
 # ----------------------------
-# Create PVC if it doesn't exist
-# ----------------------------
-if ! oc get pvc "${APP}-data" &>/dev/null; then
-    echo ">>> Creating PVC for data..."
-    oc apply -f - <<EOF
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: ${APP}-data
-  labels: 
-    app: ${APP} 
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: ${PVC_SIZE}
-EOF
-	echo ">>> Waiting for PVC to be ready..."
-	COUNT=0
-	while true; do
-		STATUS=$(oc get pvc "${APP}-data" -o jsonpath='{.status.phase}')
-		echo "Current status: $STATUS"
-		if [[ "$STATUS" == "Bound" ]]; then
-			echo ">>> PVC is ready!"
-			break
-		fi
-		sleep 5
-		COUNT=$((COUNT+1))
-		if [[ $COUNT -ge 30 ]]; then
-			echo ">>> Timeout waiting for PVC!"
-			exit 1
-		fi
-	done
-else
-    echo ">>> PVC ${APP}-data already exists, skipping creation"
-fi
-
-# ----------------------------
-# Create credentials secret
-# ----------------------------
-echo ">>> Creating RabbitMQ credentials secret..."
-oc create secret generic "${APP}-secret" \
-  --from-literal=username=rabbituser \
-  --from-literal=password=rabbitpass \
-  --dry-run=client -o yaml | oc apply -f -
-oc label secret "${APP}-secret" app="${APP}" --overwrite
-
-# ----------------------------
 # Create deployment
 # ----------------------------
 echo ">>> Creating deployment..."
@@ -130,18 +80,7 @@ oc patch deployment "${APP}" --type=json -p='[
 oc set env deployment/"${APP}" \
   RABBITMQ_DEFAULT_USER=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_USER}' | base64 --decode) \
   RABBITMQ_DEFAULT_PASS=$(oc get secret ogs-rabbitmq -o jsonpath='{.data.RABBITMQ_DEFAULT_PASS}' | base64 --decode)
-
-# ----------------------------
-# Attach PVC
-# ----------------------------
-echo ">>> Attaching PVC..."
-oc set volume deployment/"${APP}" \
-    --add \
-	--name="${APP}-data" \
-    --type=pvc \
-    --claim-name="${APP}-data" \
-    --mount-path=/var/lib/rabbitmq
-
+  
 # ----------------------------
 # Set resources (optional)
 # ----------------------------
