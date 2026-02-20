@@ -96,21 +96,14 @@ or in one swoop:
 	- Review and confirm with 'Y'
 ```
 
-#### 7. Deploy Cronjobs:
-
-```bash	
-./scripts/manage-cronjob-db-backup.sh deploy
-	- Review and confirm with 'Y'
-```
-
-#### 8. Deploy the Reverse Proxy:
+#### 7. Deploy the Reverse Proxy:
 
 ```bash	
 ./scripts/manage-rproxy.sh deploy
 	- Review and confirm with 'Y'
 ```
 
-#### 9. Start adding tables, data, layers, security, etc.
+#### 8. Start adding tables, data, layers, security, etc.
 
 The following endpoints are available to build your own custom setup:
 - GeoServer WebUi: <a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/</a>
@@ -121,8 +114,6 @@ User account details are available as secrets within:
 - ogs-postgresql-cluster-pguser-ogs-ro-user
 - ogs-postgresql-cluster-pguser-ogs-rw-user
 - ogs-postgresql-cluster-pguser-postgres
-
-
 
 #### Optional: Deploy PGAdmin in Tools Workspace:
 
