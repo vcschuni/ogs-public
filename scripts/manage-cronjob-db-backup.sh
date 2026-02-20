@@ -5,6 +5,7 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-cronjob-db-backup"
+TARGET_IMAGE="ogs-pgadmin:latest"
 TARGET_SCRIPT="/scripts/backup-databases.sh"
 SCHEDULE="0 6,18 * * *"
 PVC_NAME="ogs-pgadmin-data"
@@ -13,11 +14,25 @@ PVC_NAME="ogs-pgadmin-data"
 # Verify passed arg and show help if required
 # ----------------------------
 OPTIONS=("deploy" "remove")
+OPTIONS_STR=$(IFS='|'; echo "${OPTIONS[*]}")
 ACTION="${1:-}"
+TARGET_NAMESPACE="${2:-}"
+
+# Check if ACTION is valid
 if [[ ! " ${OPTIONS[*]} " =~ " ${ACTION} " ]]; then
     echo
-    echo "USAGE: $(basename "$0") <${OPTIONS[*]// /|}>"
-    echo "EXAMPLE: $(basename "$0") ${OPTIONS[0]}"
+    echo "USAGE: $(basename "$0") <${OPTIONS_STR}> <target>"
+    echo "EXAMPLE: $(basename "$0") ${OPTIONS[0]} abc123-dev"
+    echo
+    exit 1
+fi
+
+# Check if TARGET_NAMESPACE is provided
+if [[ -z "$TARGET_NAMESPACE" ]]; then
+    echo
+    echo "ERROR: target namespace parameter is required"
+    echo "USAGE: $(basename "$0") <${OPTIONS_STR}> <target>"
+    echo "EXAMPLE: $(basename "$0") ${OPTIONS[0]} abc123-dev"
     echo
     exit 1
 fi
@@ -28,13 +43,6 @@ fi
 PROJ=$(oc project -q)
 
 # ----------------------------
-# Determine target project & image
-# ----------------------------
-PROJ=$(oc project -q)
-TARGET_IMAGE="ogs-pgadmin:latest"
-TARGET_PROJECT="${PROJ%%-*}-tools"
-
-# ----------------------------
 # Confirm action
 # ----------------------------
 echo
@@ -42,7 +50,7 @@ echo "========================================"
 echo " Action:            ${ACTION}"
 echo " App:               ${APP}"
 echo " Project:           ${PROJ}"
-echo " Target:            ${TARGET_PROJECT}"/"${TARGET_IMAGE}"
+echo " Target Namespace:  ${TARGET_NAMESPACE}"
 echo "========================================"
 echo
 read -r -p "Continue? [y/N]: " CONFIRM
@@ -78,7 +86,7 @@ fi
 echo ">>> Creating cronjob..."
 oc create cronjob "${APP}" \
   --schedule="${SCHEDULE}" \
-  --image=image-registry.openshift-image-registry.svc:5000/"${TARGET_PROJECT}"/"${TARGET_IMAGE}" \
+  --image=image-registry.openshift-image-registry.svc:5000/"${PROJ}"/"${TARGET_IMAGE}" \
   -- /bin/bash -c "${TARGET_SCRIPT}"
 
 # ----------------------------
@@ -114,9 +122,9 @@ oc patch cronjob "${APP}" --type=merge -p '{
 # Inject runtime variables
 # ----------------------------
 oc set env cronjob/"${APP}" \
-	POSTGRES_HOST=$(oc get secret ogs-postgresql-cluster-pguser-postgres -o jsonpath='{.data.host}' | base64 --decode) \
-	POSTGRES_PASSWORD=$(oc get secret ogs-postgresql-cluster-pguser-postgres -o jsonpath='{.data.password}' | base64 --decode) \
-	PROJECT="${PROJ}"
+	POSTGRES_HOST=$(oc get secret ogs-postgresql-cluster-pguser-postgres -n ${TARGET_NAMESPACE} -o jsonpath='{.data.host}' | base64 --decode) \
+	POSTGRES_PASSWORD=$(oc get secret ogs-postgresql-cluster-pguser-postgres -n ${TARGET_NAMESPACE} -o jsonpath='{.data.password}' | base64 --decode) \
+	PROJECT="${TARGET_NAMESPACE}"
 
 # ----------------------------
 # Attach PVC (same as pgAdmin)
