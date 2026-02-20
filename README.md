@@ -7,8 +7,8 @@ This repository contains the required components to build a **Public Facing Spat
 - **Nginx**: a rate limiting and caching reverse proxy exposed externally for GeoServer and PGAdmin Web.
 - **GeoServer Cloud**: high performance server for transforming and sharing geospatial data.
 - **PostgreSQL / PostGIS (via Crunchy)**: a powerful clustered object-relational database system enabled with geospatial functionality.
-- **PGAdmin Web**: an administration and management tool for PostgreSQL databases.
 - **RabbitMQ**: a message broker that allows individual GeoServer Cloud microservices to communicate with each other.
+- **PGAdmin Web**: a monitoring and management tool for PostgreSQL databases [optional].
 
 #### Databases:
 - **ogs_configuration**: a database that stores GeoServer Cloud configuration.  Each GeoServer microservice (webui, wfs, etc) connects to it.
@@ -162,9 +162,8 @@ oc create secret generic ogs-pgadmin \
 ```
 #### 6. Deploy Database Backup CronJobs per Project
 
-Replace [target-project-id] with the name of your Project you wish to run the database backup (i.e. abc123-dev, abc123-test, or abc123-prod).
+Replace [target-project-id] with the name of your Project you wish to run the database backup for (i.e. abc123-dev, abc123-test, or abc123-prod). Requires ogs-cronjob-schedules secret in each target project.
 ```bash		
-# Deploy Database Backup CronJob per project (Requires ogs-cronjob-schedules secret labelled as optional above).
 ./scripts/manage-cronjob-db-backup.sh deploy [target-project-id]
 	- Review and confirm with 'Y'
 ```
