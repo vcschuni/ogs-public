@@ -14,12 +14,11 @@ This repository contains the required components to build a **Public Facing Spat
 - **ogs_configuration**: a database that stores GeoServer Cloud configuration.  Each GeoServer microservice (webui, wfs, etc) connects to it.
 - **gisdata**: a database that stores all your geospatial data.
 
-#### User Accounts:
+#### Database User Accounts:
 - **postgres**: the superuser for administering the postgresql cluster
 - **ogs-config-user**: the user that GeoServer Cloud uses to connect to the ogs_configuration database.
 - **ogs-ro-user**: a read-only user for the gisdata database.
 - **ogs-rw-user**: a read-write user for the gisdata database.
-
 
 ## Build/Deployment
 #### Requirements:
@@ -41,10 +40,6 @@ oc project <your project id>
 
 #### 3. Add OpenShift secrets:
 ```bash
-oc create secret generic ogs-pgadmin \
-  --from-literal=PGADMIN_EMAIL=admin@example.com \
-  --from-literal=PGADMIN_PASSWORD=***password***
-  
 oc create secret generic ogs-geoserver \
   --from-literal=GEOSERVER_ADMIN_USER=admin \
   --from-literal=GEOSERVER_ADMIN_PASSWORD=***password***
@@ -95,28 +90,21 @@ or in one swoop:
 	- Review and confirm with 'Y'
 ```
 
-#### 7. Deploy PGAdmin:
-
-```bash	
-./scripts/manage-pgadmin.sh deploy
-	- Review and confirm with 'Y'
-```
-
-#### 8. Deploy Cronjobs:
+#### 7. Deploy Cronjobs:
 
 ```bash	
 ./scripts/manage-cronjob-db-backup.sh deploy
 	- Review and confirm with 'Y'
 ```
 
-#### 9. Deploy the Reverse Proxy:
+#### 8. Deploy the Reverse Proxy:
 
 ```bash	
 ./scripts/manage-rproxy.sh deploy
 	- Review and confirm with 'Y'
 ```
 
-#### 10. Start adding tables, data, layers, security, etc.
+#### 9. Start adding tables, data, layers, security, etc.
 
 The following endpoints are available to build your own custom setup:
 - GeoServer WebUi: <a href="https://ogs-${PROJ}.apps.silver.devops.gov.bc.ca/">https://ogs-[project-name].apps.silver.devops.gov.bc.ca/</a>
@@ -127,6 +115,50 @@ User account details are available as secrets within:
 - ogs-postgresql-cluster-pguser-ogs-ro-user
 - ogs-postgresql-cluster-pguser-ogs-rw-user
 - ogs-postgresql-cluster-pguser-postgres
+
+
+
+#### Optional: Deploy PGAdmin in Tools Workspace:
+
+PgAdmin can monitor and manage your Crunchy PostGreSQL Cluster in all of your project namespaces (DEV, TEST, & PROD).
+```bash	
+# Switch to Tools Project
+oc project <your tools project id>
+
+# Create PgAdmin Secret
+oc create secret generic ogs-pgadmin \
+  --from-literal=PGADMIN_EMAIL=admin@example.com \
+  --from-literal=PGADMIN_PASSWORD=***password***
+
+# Deploy PgAdmin
+./scripts/manage-pgadmin.sh deploy
+	- Review and confirm with 'Y'
+```
+
+Create a NetworkPolicy in each namespace (DEV, TEST, PROD) that you want PgAdmin to have access to by using the following YAML.  You will need to replace [tools-project-name] with the name of your tools namespace (i.e. abc123-tools).
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ogs-allow-pgadmin-pods-only
+spec:
+  podSelector:
+    matchLabels:
+      postgres-operator.crunchydata.com/cluster: ogs-postgresql-cluster
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: [tools-project-name]
+      podSelector:
+        matchLabels:
+          app: ogs-pgadmin
+    ports:
+    - protocol: TCP
+      port: 5432
+```
 
 ## Notes
 

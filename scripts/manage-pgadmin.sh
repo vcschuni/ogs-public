@@ -27,6 +27,11 @@ fi
 PROJ=$(oc project -q)
 
 # ----------------------------
+# Define hostname
+# ----------------------------
+SERVICE_HOSTNAME="pgadmin-${PROJ}.apps.silver.devops.gov.bc.ca"
+
+# ----------------------------
 # Confirm action
 # ----------------------------
 echo
@@ -34,6 +39,7 @@ echo "========================================"
 echo " Action:            ${ACTION}"
 echo " App:               ${APP}"
 echo " Project:           ${PROJ}"
+echo " Service Hostname:  ${SERVICE_HOSTNAME}"
 echo "========================================"
 echo
 read -r -p "Continue? [y/N]: " CONFIRM
@@ -171,11 +177,14 @@ oc set volume deployment/"${APP}" \
 oc set resources deployment/"${APP}" --limits=cpu=750m,memory=1Gi --requests=cpu=250m,memory=512Mi
 
 # ----------------------------
-# Rollout and expose internally
+# Rollout
 # ----------------------------
 echo ">>> Waiting for deployment rollout..."
 oc rollout status deployment/"${APP}" --timeout=300s
 
+# ----------------------------
+# Expose internal service
+# ----------------------------
 if ! oc get service "${APP}" &>/dev/null; then
 	echo ">>> Creating internal service..."
 	oc expose deployment "${APP}" \
@@ -184,6 +193,27 @@ if ! oc get service "${APP}" &>/dev/null; then
 	  --labels=app="${APP}" \
 	  --dry-run=client -o yaml | oc apply -f -
 fi
+
+# ----------------------------
+# Expose external route
+# ----------------------------
+if ! oc get route "${APP}" &>/dev/null; then
+  echo ">>> Creating external route..."
+  oc expose service "${APP}" \
+    --name="${APP}" \
+    --hostname="${SERVICE_HOSTNAME}"
+
+  echo ">>> Enabling HTTPS..."
+  oc patch route "${APP}" -p '{
+    "spec": {
+      "tls": {
+        "termination": "edge",
+        "insecureEdgeTerminationPolicy": "Redirect"
+      }
+    }
+  }'
+fi
+
 
 # ----------------------------
 # Cleanup builds
