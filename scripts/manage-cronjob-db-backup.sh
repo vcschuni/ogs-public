@@ -7,7 +7,6 @@ set -euo pipefail
 APP="ogs-cronjob-db-backup"
 TARGET_IMAGE="ogs-pgadmin:latest"
 TARGET_SCRIPT="/scripts/backup-databases.sh"
-SCHEDULE="0 6,18 * * *"
 PVC_NAME="ogs-pgadmin-data"
 
 # ----------------------------
@@ -43,6 +42,16 @@ fi
 PROJ=$(oc project -q)
 
 # ----------------------------
+# Modify APP name
+# ----------------------------
+APP="${APP}-for-${TARGET_NAMESPACE}"
+
+# ----------------------------
+# Get Schedule from target namespace
+# ----------------------------
+SCHEDULE=$(oc get secret ogs-cronjob-schedules -n ${TARGET_NAMESPACE} -o jsonpath='{.data.db_backup}' | base64 --decode)
+
+# ----------------------------
 # Confirm action
 # ----------------------------
 echo
@@ -51,6 +60,7 @@ echo " Action:            ${ACTION}"
 echo " App:               ${APP}"
 echo " Project:           ${PROJ}"
 echo " Target Namespace:  ${TARGET_NAMESPACE}"
+echo " Schedule:          ${SCHEDULE}"
 echo "========================================"
 echo
 read -r -p "Continue? [y/N]: " CONFIRM
@@ -88,6 +98,7 @@ oc create cronjob "${APP}" \
   --schedule="${SCHEDULE}" \
   --image=image-registry.openshift-image-registry.svc:5000/"${PROJ}"/"${TARGET_IMAGE}" \
   -- /bin/bash -c "${TARGET_SCRIPT}"
+oc label cronjob "${APP}" app="${APP}" --overwrite
 
 # ----------------------------
 # Set cronjob to PST

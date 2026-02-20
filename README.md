@@ -40,13 +40,19 @@ oc project <your project id>
 
 #### 3. Add OpenShift secrets:
 ```bash
+# Create GeoServer Secrets
 oc create secret generic ogs-geoserver \
   --from-literal=GEOSERVER_ADMIN_USER=admin \
   --from-literal=GEOSERVER_ADMIN_PASSWORD=***password***
-  
+
+# Create RabbitMQ Secrets
 oc create secret generic ogs-rabbitmq \
   --from-literal=RABBITMQ_DEFAULT_USER=admin \
   --from-literal=RABBITMQ_DEFAULT_PASS=***password***
+  
+# Create the CronJob Schedule (optional)
+oc create secret generic ogs-cronjob-schedules \
+  --from-literal=db_backup="0 6,18 * * *"
 ```
 
 #### 4. Build Crunchy Cluster:
@@ -133,14 +139,18 @@ oc create secret generic ogs-pgadmin \
 # Deploy PgAdmin
 ./scripts/manage-pgadmin.sh deploy
 	- Review and confirm with 'Y'
+	
+# Deploy Database Backup CronJob per namespace (Requires ogs-cronjob-schedules secret labelled as optional above).
+./scripts/manage-cronjob-db-backup.sh deploy <namespace>
+	- Review and confirm with 'Y'
 ```
 
-Create a NetworkPolicy in each namespace (DEV, TEST, PROD) that you want PgAdmin to have access to by using the following YAML.  You will need to replace [tools-project-name] with the name of your tools namespace (i.e. abc123-tools).
+Create a NetworkPolicy in each namespace (DEV, TEST, PROD) that you want PgAdmin and the DB Backup CronJobs to have access to by using the following YAML.  You will need to replace [tools-project-name] with the name of your tools namespace (i.e. abc123-tools).
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: ogs-allow-pgadmin-pods-only
+  name: ogs-allow-tools-namespace
 spec:
   podSelector:
     matchLabels:
@@ -152,9 +162,6 @@ spec:
     - namespaceSelector:
         matchLabels:
           kubernetes.io/metadata.name: [tools-project-name]
-      podSelector:
-        matchLabels:
-          app: ogs-pgadmin
     ports:
     - protocol: TCP
       port: 5432
