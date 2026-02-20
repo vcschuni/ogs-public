@@ -54,19 +54,19 @@ oc create secret generic ogs-rabbitmq \
   --from-literal=RABBITMQ_DEFAULT_PASS=***password***
 ```
 
-#### 4. Deploy Message Broker:
-
-```bash	
-./scripts/manage-rabbitmq.sh deploy
-	- Review and confirm with 'Y'
-```
-
-#### 5. Build Crunchy Cluster:
+#### 4. Build Crunchy Cluster:
 
 ```bash
 oc apply -f k8s/postgres/cluster-init.yaml
 oc apply -f k8s/postgres/cluster.yaml
 oc wait --for=condition=Ready postgrescluster/ogs-postgresql-cluster --timeout=20m
+```
+
+#### 5. Deploy Message Broker:
+
+```bash	
+./scripts/manage-rabbitmq.sh deploy
+	- Review and confirm with 'Y'
 ```
 
 #### 6. Deploy GeoServer Components:
