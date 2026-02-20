@@ -115,28 +115,9 @@ User account details are available as secrets within:
 - ogs-postgresql-cluster-pguser-ogs-rw-user
 - ogs-postgresql-cluster-pguser-postgres
 
-#### Optional: Deploy PGAdmin in Tools Workspace:
+#### Optional: Deploy PGAdmin & Database Backup CronJobs in Tools Workspace:
 
-PgAdmin can monitor and manage your Crunchy PostGreSQL Cluster in all of your project namespaces (DEV, TEST, & PROD).
-```bash	
-# Switch to Tools Project
-oc project <your tools project id>
-
-# Create PgAdmin Secret
-oc create secret generic ogs-pgadmin \
-  --from-literal=PGADMIN_EMAIL=admin@example.com \
-  --from-literal=PGADMIN_PASSWORD=***password***
-
-# Deploy PgAdmin
-./scripts/manage-pgadmin.sh deploy
-	- Review and confirm with 'Y'
-	
-# Deploy Database Backup CronJob per namespace (Requires ogs-cronjob-schedules secret labelled as optional above).
-./scripts/manage-cronjob-db-backup.sh deploy <namespace>
-	- Review and confirm with 'Y'
-```
-
-Create a NetworkPolicy in each namespace (DEV, TEST, PROD) that you want PgAdmin and the DB Backup CronJobs to have access to by using the following YAML.  You will need to replace [tools-project-name] with the name of your tools namespace (i.e. abc123-tools).
+Create a NetworkPolicy in each namespace (DEV, TEST, PROD) that you want PgAdmin and the DB Backup CronJobs to have access to by using the following YAML.  You will need to replace [tools-namespace] with the name of your tools namespace (i.e. abc123-tools).
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -152,11 +133,35 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          kubernetes.io/metadata.name: [tools-project-name]
+          kubernetes.io/metadata.name: [tools-namespace]
     ports:
     - protocol: TCP
       port: 5432
 ```
+
+PgAdmin can monitor and manage your Crunchy PostGreSQL Cluster in all of your project namespaces (DEV, TEST, & PROD).
+```bash	
+# Switch to Tools Project
+oc project <your tools project id>
+
+# Create PgAdmin Secret
+oc create secret generic ogs-pgadmin \
+  --from-literal=PGADMIN_EMAIL=admin@example.com \
+  --from-literal=PGADMIN_PASSWORD=***password***
+
+# Deploy PgAdmin
+./scripts/manage-pgadmin.sh deploy
+	- Review and confirm with 'Y'
+```
+
+Deploy Database Backup CronJobs per namespace.  You will need to replace [target-namespace-to-backup] with the name of your namespace you wish to run the database backup (i.e. abc123-dev).
+```bash		
+# Deploy Database Backup CronJob per namespace (Requires ogs-cronjob-schedules secret labelled as optional above).
+./scripts/manage-cronjob-db-backup.sh deploy [target-namespace-to-backup]
+	- Review and confirm with 'Y'
+```
+
+
 
 ## Notes
 
