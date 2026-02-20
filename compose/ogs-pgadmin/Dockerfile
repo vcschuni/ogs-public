@@ -11,7 +11,13 @@ RUN apt-get update && apt-get install -y \
 	rsync \
 	ssh \
 	nano \
+	tzdata \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+	
+# Set timezone
+ENV TZ=America/Vancouver
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone
 
 # Create virtual environment and install pgAdmin4 + Gunicorn
 RUN python3.13 -m venv /opt/pgadmin/venv \

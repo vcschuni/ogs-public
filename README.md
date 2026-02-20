@@ -35,10 +35,10 @@ cd ogs-public
 #### 2. Login to OpenShift Cluster & Set the Project:
 ```bash
 oc login --token=<token> --server=https://api.silver.devops.gov.bc.ca:6443
-oc project <your project id>
+oc project <your-project-id>
 ```
 
-#### 3. Add OpenShift secrets:
+#### 3. Add Secrets:
 ```bash
 # Create GeoServer Secrets
 oc create secret generic ogs-geoserver \
@@ -115,14 +115,17 @@ User account details are available as secrets within:
 - ogs-postgresql-cluster-pguser-ogs-rw-user
 - ogs-postgresql-cluster-pguser-postgres
 
-#### Optional: Deploy PGAdmin & Database Backup CronJobs in Tools Workspace:
+## * Optional (in TOOLS Project) *
 
-Create a NetworkPolicy in each namespace (DEV, TEST, PROD) that you want PgAdmin and the DB Backup CronJobs to have access to by using the following YAML.  You will need to replace [tools-namespace] with the name of your tools namespace (i.e. abc123-tools).
+#### 1. Create NetworkPolicies:
+
+In each project (i.e. abc123-dev, abc123-test, or abc123-prod) that you want PgAdmin and the DB Backup CronJobs to have access to, apply the following YAML to create a NetworkPolicy.  You will need to replace [tools-project-id] with the name of your tools project (i.e. abc123-tools).
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: ogs-allow-tools-namespace
+  name: ogs-allow-tools-project-id
 spec:
   podSelector:
     matchLabels:
@@ -133,31 +136,36 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          kubernetes.io/metadata.name: [tools-namespace]
+          kubernetes.io/metadata.name: [tools-project-id]
     ports:
     - protocol: TCP
       port: 5432
 ```
 
-PgAdmin can monitor and manage your Crunchy PostGreSQL Cluster in all of your project namespaces (DEV, TEST, & PROD).
-```bash	
-# Switch to Tools Project
-oc project <your tools project id>
+#### 2. Switch to Tools Project:
 
-# Create PgAdmin Secret
+```bash	
+oc project <tools-project-id>
+```
+
+#### 4. Add Secrets:
+```bash	
 oc create secret generic ogs-pgadmin \
   --from-literal=PGADMIN_EMAIL=admin@example.com \
   --from-literal=PGADMIN_PASSWORD=***password***
+```
 
-# Deploy PgAdmin
+#### 5. Deploy PgAdmin:
+```bash	
 ./scripts/manage-pgadmin.sh deploy
 	- Review and confirm with 'Y'
 ```
+#### 6. Deploy Database Backup CronJobs per Project
 
-Deploy Database Backup CronJobs per namespace.  You will need to replace [target-namespace-to-backup] with the name of your namespace you wish to run the database backup (i.e. abc123-dev).
+Replace [target-project-id] with the name of your Project you wish to run the database backup (i.e. abc123-dev, abc123-test, or abc123-prod).
 ```bash		
-# Deploy Database Backup CronJob per namespace (Requires ogs-cronjob-schedules secret labelled as optional above).
-./scripts/manage-cronjob-db-backup.sh deploy [target-namespace-to-backup]
+# Deploy Database Backup CronJob per project (Requires ogs-cronjob-schedules secret labelled as optional above).
+./scripts/manage-cronjob-db-backup.sh deploy [target-project-id]
 	- Review and confirm with 'Y'
 ```
 
