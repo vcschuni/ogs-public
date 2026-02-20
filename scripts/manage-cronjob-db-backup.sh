@@ -5,7 +5,6 @@ set -euo pipefail
 # Config
 # ----------------------------
 APP="ogs-cronjob-db-backup"
-TARGET_IMAGE="ogs-pgadmin:latest"
 TARGET_SCRIPT="/scripts/backup-databases.sh"
 SCHEDULE="0 6,18 * * *"
 PVC_NAME="ogs-pgadmin-data"
@@ -29,6 +28,13 @@ fi
 PROJ=$(oc project -q)
 
 # ----------------------------
+# Determine target project & image
+# ----------------------------
+PROJ=$(oc project -q)
+TARGET_IMAGE="ogs-pgadmin:latest"
+TARGET_PROJECT="${PROJ%%-*}-tools"
+
+# ----------------------------
 # Confirm action
 # ----------------------------
 echo
@@ -36,6 +42,7 @@ echo "========================================"
 echo " Action:            ${ACTION}"
 echo " App:               ${APP}"
 echo " Project:           ${PROJ}"
+echo " Target:            ${TARGET_PROJECT}"/"${TARGET_IMAGE}"
 echo "========================================"
 echo
 read -r -p "Continue? [y/N]: " CONFIRM
@@ -71,7 +78,7 @@ fi
 echo ">>> Creating cronjob..."
 oc create cronjob "${APP}" \
   --schedule="${SCHEDULE}" \
-  --image=image-registry.openshift-image-registry.svc:5000/"${PROJ}"/"${TARGET_IMAGE}" \
+  --image=image-registry.openshift-image-registry.svc:5000/"${TARGET_PROJECT}"/"${TARGET_IMAGE}" \
   -- /bin/bash -c "${TARGET_SCRIPT}"
 
 # ----------------------------
@@ -107,7 +114,9 @@ oc patch cronjob "${APP}" --type=merge -p '{
 # Inject runtime variables
 # ----------------------------
 oc set env cronjob/"${APP}" \
-	POSTGRES_PASSWORD=$(oc get secret ogs-postgresql-cluster-pguser-postgres -o jsonpath='{.data.password}' | base64 --decode)
+	POSTGRES_HOST=$(oc get secret ogs-postgresql-cluster-pguser-postgres -o jsonpath='{.data.host}' | base64 --decode) \
+	POSTGRES_PASSWORD=$(oc get secret ogs-postgresql-cluster-pguser-postgres -o jsonpath='{.data.password}' | base64 --decode) \
+	PROJECT="${PROJ}"
 
 # ----------------------------
 # Attach PVC (same as pgAdmin)

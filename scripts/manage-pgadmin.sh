@@ -6,7 +6,7 @@ set -euo pipefail
 # ----------------------------
 APP="ogs-pgadmin"
 REPO="https://github.com/vcschuni/ogs-public.git"
-PVC_SIZE="2Gi"
+PVC_SIZE="10Gi"
 
 # ----------------------------
 # Verify passed arg and show help if required

@@ -6,9 +6,9 @@ set -euo pipefail
 # -----------------------------
 DB_USER="postgres"
 DB_PASSWORD="${POSTGRES_PASSWORD}"
-DB_HOST="ogs-postgresql-cluster-primary"
+DB_HOST="${POSTGRES_HOST}"
 DB_PORT=5432
-BACKUP_DIR="/var/lib/pgadmin/storage/spatialadmin_gov.bc.ca/backups" 
+BACKUP_DIR="/var/lib/pgadmin/storage/spatialadmin_gov.bc.ca/backups/${PROJECT}" 
 RETENTION_DAYS=14
 DATABASES=("postgres" "gisdata" "ogs_configuration")
 DATESTAMP=$(date +'%Y%m%d-%H')
